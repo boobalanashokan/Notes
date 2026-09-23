@@ -5,8 +5,8 @@ My personal study notes.
 <!-- INDEX:START -->
 ## Index
 
-## Devops
+## Foundations
 
-  - [Linux](DevOPs/linux.md)
-  - [Networking](DevOPs/Networking.md)
+  - [Linux](Foundations/linux.md)
+  - [Networking](Foundations/Networking.md)
 <!-- INDEX:END -->
