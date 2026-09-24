@@ -21,9 +21,42 @@
   text-transform: uppercase;
 }
 
+.nav-controls {
+  display: flex;
+  align-items: center;
+  gap: 0.9rem;
+}
+
 .nav-links {
   display: flex;
   gap: 0.75rem;
+}
+
+.track-switcher {
+  display: flex;
+  align-items: center;
+  gap: 0.55rem;
+  background: rgba(148, 163, 184, 0.12);
+  border: 1px solid rgba(148, 163, 184, 0.2);
+  border-radius: 999px;
+  padding: 0.45rem 0.65rem;
+}
+
+.track-switcher-label {
+  color: #cbd5e1;
+  font-size: 0.78rem;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  font-weight: 700;
+}
+
+.track-switcher select {
+  background: #ffffff;
+  color: #0f172a;
+  border: 1px solid #cbd5e1;
+  border-radius: 999px;
+  padding: 0.5rem 0.8rem;
+  font-weight: 600;
 }
 
 .nav-item {
@@ -484,6 +517,64 @@ textarea {
 
 .muted-text {
   color: #64748b;
+}
+
+.track-json-page {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+.track-json-note {
+  border: 1px solid #dbeafe;
+  background: #eff6ff;
+  color: #1e3a8a;
+  border-radius: 12px;
+  padding: 1rem;
+  line-height: 1.5;
+}
+
+.track-json-template {
+  white-space: pre-wrap;
+  background: #0f172a;
+  color: #e2e8f0;
+  border-radius: 12px;
+  padding: 1rem;
+  font-size: 0.82rem;
+  overflow-x: auto;
+  line-height: 1.5;
+}
+
+.track-json-actions {
+  display: flex;
+  gap: 0.75rem;
+  flex-wrap: wrap;
+  margin-top: 0.5rem;
+}
+
+.track-summary {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 1rem;
+}
+
+.summary-box {
+  background: #f8fafc;
+  border: 1px solid #e2e8f0;
+  border-radius: 12px;
+  padding: 1rem;
+}
+
+.summary-box h4 {
+  font-size: 0.8rem;
+  color: #64748b;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  margin-bottom: 0.35rem;
+}
+
+.summary-box strong {
+  font-size: 1.4rem;
 }
 
 .preview-box {

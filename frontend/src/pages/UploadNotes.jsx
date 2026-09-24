@@ -6,8 +6,8 @@ import {
   previewMapping,
   uploadFiles,
 } from '../api'
+import { useTrack } from '../TrackContext'
 
-const TRACK_ID = 'mlops'
 const VALID_EXTENSIONS = new Set(['.pdf', '.png', '.jpg', '.jpeg'])
 
 function getFileExtension(filename) {
@@ -46,6 +46,7 @@ function createFileEntry(file) {
 }
 
 function UploadNotes() {
+  const { trackId, loading: tracksLoading } = useTrack()
   const [track, setTrack] = useState(null)
   const [selectedFiles, setSelectedFiles] = useState([])
   const [dragActive, setDragActive] = useState(false)
@@ -55,11 +56,15 @@ function UploadNotes() {
   const [uploadedFileEntries, setUploadedFileEntries] = useState([])
 
   useEffect(() => {
+    if (tracksLoading || !trackId) {
+      return
+    }
+
     let ignore = false
 
     async function loadTrack() {
       try {
-        const data = await getTrack(TRACK_ID)
+        const data = await getTrack(trackId)
         if (!ignore) {
           setTrack(data)
         }
@@ -74,7 +79,7 @@ function UploadNotes() {
     return () => {
       ignore = true
     }
-  }, [])
+  }, [trackId, tracksLoading])
 
   const areaOptions = track?.areas || []
 
@@ -170,7 +175,7 @@ function UploadNotes() {
     })
 
     try {
-      const data = await getMappingOptions(TRACK_ID, areaId, topicId)
+      const data = await getMappingOptions(trackId, areaId, topicId)
       updateMapping(fileId, mappingId, {
         validSubtopics: data?.valid_subtopics || [],
       })
@@ -212,7 +217,7 @@ function UploadNotes() {
     setUploadResult(null)
 
     try {
-      const result = await uploadFiles(TRACK_ID, selectedFiles)
+      const result = await uploadFiles(trackId, selectedFiles)
       const savedFiles = Array.isArray(result?.saved_files) ? result.saved_files : []
 
       const nextEntries = selectedFiles.map((file, index) => {
@@ -263,7 +268,7 @@ function UploadNotes() {
         subtopics: mapping.selectedSubtopics,
         note_text: mapping.noteText,
       }
-      const result = await previewMapping(TRACK_ID, mapping.areaId, mapping.topicId, payload)
+      const result = await previewMapping(trackId, mapping.areaId, mapping.topicId, payload)
       updateMapping(fileId, mappingId, {
         preview: result,
         mode: result.file_exists ? 'append' : 'append',
@@ -310,7 +315,7 @@ function UploadNotes() {
         ...(mapping.preview.file_exists ? { mode: mapping.mode } : {}),
       }
 
-      const result = await approveMapping(TRACK_ID, mapping.areaId, mapping.topicId, payload)
+      const result = await approveMapping(trackId, mapping.areaId, mapping.topicId, payload)
       updateMapping(fileId, mappingId, {
         approveLoading: false,
         approveResult: result,
@@ -347,6 +352,10 @@ function UploadNotes() {
     event.preventDefault()
     setDragActive(false)
     addFiles(event.dataTransfer.files)
+  }
+
+  if (tracksLoading || !trackId) {
+    return <div className="page-shell"><div className="card"><p>Loading upload page...</p></div></div>
   }
 
   return (

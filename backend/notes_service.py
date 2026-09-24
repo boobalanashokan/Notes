@@ -18,7 +18,10 @@ def render_markdown_section(
     mapped_at: str,
 ) -> str:
     source_lines = "\n".join(f"- [{Path(source).name}]({source})" for source in source_files) if source_files else "- None"
-    subtopic_lines = "\n".join(f"- [ ] {subtopic}" for subtopic in subtopics) if subtopics else "- None"
+    checked = status == "Done"
+    subtopic_lines = "\n".join(
+        f"- [{'x' if checked else ' '}] {subtopic}" for subtopic in subtopics
+    ) if subtopics else "- None"
     note_body = note_text.strip()
     return (
         "---\n"

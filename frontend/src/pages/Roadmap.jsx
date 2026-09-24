@@ -1,7 +1,9 @@
 import { useEffect, useMemo, useState } from 'react'
 import { getTrack } from '../api'
+import { useTrack } from '../TrackContext'
 
 function Roadmap() {
+  const { trackId, loading: tracksLoading } = useTrack()
   const [track, setTrack] = useState(null)
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState('')
@@ -10,11 +12,17 @@ function Roadmap() {
   const [expandedAreas, setExpandedAreas] = useState({})
 
   useEffect(() => {
+    if (tracksLoading || !trackId) {
+      setLoading(true)
+      return
+    }
+
     let ignore = false
 
     async function loadTrack() {
       try {
-        const data = await getTrack('mlops')
+        setLoading(true)
+        const data = await getTrack(trackId)
         if (!ignore) {
           setTrack(data)
           if (data?.areas?.length) {
@@ -36,7 +44,7 @@ function Roadmap() {
     return () => {
       ignore = true
     }
-  }, [])
+  }, [trackId, tracksLoading])
 
   const areaOptions = useMemo(() => {
     if (!track?.areas) return []

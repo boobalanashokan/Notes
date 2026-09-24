@@ -1,23 +1,32 @@
 import { useEffect, useState } from 'react'
 import { getTrackStats } from '../api'
+import { useTrack } from '../TrackContext'
 
 function Dashboard() {
+  const { trackId, trackName, loading: tracksLoading } = useTrack()
   const [stats, setStats] = useState(null)
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState('')
 
   useEffect(() => {
+    if (tracksLoading || !trackId) {
+      setLoading(true)
+      return
+    }
+
     let ignore = false
 
     async function loadStats() {
       try {
-        const data = await getTrackStats('mlops')
+        setLoading(true)
+        const data = await getTrackStats(trackId)
         if (!ignore) {
           setStats(data)
           setError('')
         }
       } catch (err) {
         if (!ignore) {
+          setStats(null)
           setError('Could not reach backend — is it running on port 8000?')
         }
       } finally {
@@ -31,9 +40,9 @@ function Dashboard() {
     return () => {
       ignore = true
     }
-  }, [])
+  }, [trackId, tracksLoading])
 
-  if (loading) {
+  if (tracksLoading || !trackId || loading) {
     return <div className="page-shell"><div className="card"><p>Loading dashboard...</p></div></div>
   }
 
@@ -48,7 +57,7 @@ function Dashboard() {
       <div className="card hero-card">
         <div className="hero-row">
           <div>
-            <p className="eyebrow">MLOps progress</p>
+            <p className="eyebrow">{trackName || 'Track'} progress</p>
             <h1>{progressValue}% complete</h1>
           </div>
           <div className="big-pill">{stats.completed_topics}/{stats.total_topics} complete</div>

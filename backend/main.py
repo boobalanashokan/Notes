@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import json
+import re
 from datetime import datetime, timezone
 from pathlib import Path
 from typing import Any
@@ -8,6 +9,7 @@ from typing import Any
 from fastapi import Body, FastAPI, File, HTTPException, UploadFile
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import JSONResponse
+from pydantic import ValidationError
 
 from git_service import GitOperationError, commit_and_push
 from models import Track
@@ -22,6 +24,7 @@ from upload_service import save_upload
 
 ROOT_DIR = Path(__file__).resolve().parent.parent
 ROADMAP_PATH = ROOT_DIR / "roadmap.json"
+VALID_ID_RE = re.compile(r"^[a-z0-9-]+$")
 
 app = FastAPI(title="Study Tracker API")
 
@@ -60,6 +63,67 @@ def health() -> dict[str, str]:
 def list_tracks() -> list[dict[str, str]]:
     roadmap = load_roadmap()
     return [{"id": track.id, "name": track.name} for track in roadmap.tracks]
+
+
+@app.post("/tracks")
+def create_track(payload: dict[str, Any] = Body(...)) -> dict:
+    try:
+        track = Track.model_validate(payload)
+    except ValidationError as exc:
+        raise HTTPException(status_code=400, detail=exc.errors()) from exc
+
+    roadmap = load_roadmap()
+    if any(existing.id == track.id for existing in roadmap.tracks):
+        raise HTTPException(status_code=400, detail=f"Track id '{track.id}' already exists")
+
+    invalid_ids: list[str] = []
+    if not VALID_ID_RE.fullmatch(track.id):
+        invalid_ids.append(f"track:{track.id}")
+
+    for area in track.areas:
+        if not VALID_ID_RE.fullmatch(area.id):
+            invalid_ids.append(f"area:{area.id}")
+        for topic in area.topics:
+            if not VALID_ID_RE.fullmatch(topic.id):
+                invalid_ids.append(f"topic:{topic.id}")
+
+    if invalid_ids:
+        raise HTTPException(status_code=400, detail={"invalid_ids": invalid_ids})
+
+    all_topic_ids = {
+        topic.id
+        for area in track.areas
+        for topic in area.topics
+    }
+    invalid_depends_on: list[str] = []
+    for area in track.areas:
+        for topic in area.topics:
+            for dependency in topic.depends_on:
+                if dependency not in all_topic_ids:
+                    invalid_depends_on.append(dependency)
+    if invalid_depends_on:
+        raise HTTPException(status_code=400, detail={"invalid_depends_on": sorted(set(invalid_depends_on))})
+
+    for area in track.areas:
+        for topic in area.topics:
+            topic.done = False
+
+    saved_files = ["roadmap.json"]
+    try:
+        roadmap.tracks.append(track)
+        with ROADMAP_PATH.open("w", encoding="utf-8") as file:
+            json.dump(roadmap.model_dump(mode="json"), file, indent=2)
+            file.write("\n")
+
+        commit_sha = commit_and_push(saved_files, f"Add new track: {track.name}")
+        return {"saved_files": saved_files, "commit_sha": commit_sha}
+    except GitOperationError as exc:
+        return JSONResponse(
+            status_code=500,
+            content={"error": str(exc), "saved_files": saved_files},
+        )
+    except Exception as exc:  # pragma: no cover - runtime path for unexpected failures
+        raise HTTPException(status_code=500, detail=f"Track creation failed: {exc}") from exc
 
 
 @app.get("/tracks/{track_id}", response_model=Track)
