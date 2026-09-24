@@ -28,19 +28,31 @@ def _build_prompt(track: Any, stats: dict[str, Any]) -> str:
                 upcoming_topics.append(f"- {topic.name} ({area.name}, Week {topic.week})")
 
     next_topics = "\n".join(upcoming_topics[:6]) if upcoming_topics else "- No pending topics remain."
-    areas_snapshot = json.dumps(
-        [
+
+    area_rows = stats.get("areas") or []
+    area_snapshot = []
+    for area in area_rows:
+        if isinstance(area, dict):
+            area_name = area.get("area_name") or "Unknown area"
+            completed = area.get("completed_topics")
+            total = area.get("total_topics")
+            percent_complete = area.get("percent_complete", 0)
+        else:
+            area_name = getattr(area, "area_name", getattr(area, "name", "Unknown area"))
+            completed = getattr(area, "completed_topics", None)
+            total = getattr(area, "total_topics", None)
+            percent_complete = getattr(area, "percent_complete", 0)
+
+        area_snapshot.append(
             {
-                "area": area.name,
-                "completed": getattr(area, "completed_topics", None),
-                "total": getattr(area, "total_topics", None),
-                "percent_complete": getattr(area, "percent_complete", 0),
+                "area": area_name,
+                "completed": completed,
+                "total": total,
+                "percent_complete": percent_complete,
             }
-            for area in (stats.get("areas") or [])
-        ],
-        ensure_ascii=False,
-        indent=2,
-    )
+        )
+
+    areas_snapshot = json.dumps(area_snapshot, ensure_ascii=False, indent=2)
 
     return f"""
 You are an encouraging study coach. Analyze the learner's progress and return valid JSON only.
