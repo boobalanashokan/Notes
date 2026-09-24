@@ -4,6 +4,7 @@ import json
 from pathlib import Path
 from typing import Any, Dict, List
 
+from github_client import GitHubRepoClient
 from models import Area, Roadmap, Topic, Track
 
 ROOT_DIR = Path(__file__).resolve().parent.parent
@@ -11,9 +12,11 @@ ROADMAP_PATH = ROOT_DIR / "roadmap.json"
 
 
 def load_roadmap() -> Roadmap:
-    with ROADMAP_PATH.open("r", encoding="utf-8") as file:
-        data = json.load(file)
-    return Roadmap.model_validate(data)
+    client = GitHubRepoClient()
+    content, _ = client.get_file("roadmap.json")
+    if content is None:
+        raise FileNotFoundError("roadmap.json not found in the GitHub repository")
+    return Roadmap.model_validate(json.loads(content))
 
 
 def get_track(track_id: str) -> Track | None:

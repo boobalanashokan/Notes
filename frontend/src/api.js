@@ -1,26 +1,4 @@
-function detectApiBase() {
-  if (import.meta.env.VITE_API_BASE) {
-    return import.meta.env.VITE_API_BASE.replace(/\/$/, '')
-  }
-
-  if (typeof window === 'undefined') {
-    return 'http://127.0.0.1:8000'
-  }
-
-  const host = window.location.hostname
-  if (host === 'localhost' || host === '127.0.0.1') {
-    return 'http://127.0.0.1:8000'
-  }
-
-  const match = host.match(/^(.+)-(\d+)\.app\.github\.dev$/)
-  if (match) {
-    return `https://${match[1]}-8000.app.github.dev`
-  }
-
-  return `${window.location.protocol}//${host}:8000`
-}
-
-const API_BASE = detectApiBase()
+const API_BASE = import.meta.env.VITE_API_BASE || 'http://127.0.0.1:8000'
 
 async function readJsonResponse(response) {
   const contentType = response.headers.get('content-type') || ''

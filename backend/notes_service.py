@@ -3,6 +3,8 @@ from __future__ import annotations
 from pathlib import Path
 from typing import List, Optional
 
+from github_client import GitHubRepoClient
+
 ROOT_DIR = Path(__file__).resolve().parent.parent
 
 
@@ -44,7 +46,7 @@ def build_full_markdown(topic_name: str, sections: List[str]) -> str:
 
 
 def read_existing_markdown(track_id: str, area_id: str, topic_id: str) -> Optional[str]:
-    file_path = ROOT_DIR / markdown_path(track_id, area_id, topic_id)
-    if not file_path.exists():
-        return None
-    return file_path.read_text(encoding="utf-8")
+    client = GitHubRepoClient()
+    file_path = markdown_path(track_id, area_id, topic_id)
+    content, _ = client.get_file(file_path)
+    return content

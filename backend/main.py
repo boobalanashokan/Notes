@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import json
+import os
 import re
 from datetime import datetime, timezone
 from pathlib import Path
@@ -11,7 +12,7 @@ from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import JSONResponse
 from pydantic import ValidationError
 
-from git_service import GitOperationError, commit_and_push
+from github_client import GitHubRepoClient
 from models import Track
 from notes_service import (
     build_full_markdown,
@@ -23,18 +24,24 @@ from roadmap_service import compute_track_stats, get_topic, get_track, load_road
 from upload_service import save_upload
 
 ROOT_DIR = Path(__file__).resolve().parent.parent
-ROADMAP_PATH = ROOT_DIR / "roadmap.json"
 VALID_ID_RE = re.compile(r"^[a-z0-9-]+$")
 
 app = FastAPI(title="Study Tracker API")
 
+allowed_origins_raw = os.getenv("ALLOWED_ORIGINS", "http://localhost:5173,http://localhost:3000")
+allowed_origins = [origin.strip() for origin in allowed_origins_raw.split(",") if origin.strip()]
+
 app.add_middleware(
     CORSMiddleware,
-    allow_origin_regex=r"https?://(localhost|127\.0\.0\.1|0\.0\.0\.0|.*\.app\.github\.dev)(:\d+)?",
+    allow_origins=allowed_origins,
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
 )
+
+
+def _get_repo_client() -> GitHubRepoClient:
+    return GitHubRepoClient()
 
 
 def _validated_topic_or_404(track_id: str, area_id: str, topic_id: str):
@@ -45,12 +52,14 @@ def _validated_topic_or_404(track_id: str, area_id: str, topic_id: str):
 
 
 def _validate_source_files(source_files: list[str]) -> None:
-    inbox_root = (ROOT_DIR / "Inbox").resolve()
+    client = _get_repo_client()
     for source_file in source_files:
         if not isinstance(source_file, str):
             raise HTTPException(status_code=400, detail=f"Invalid source_file entry: {source_file!r}")
-        candidate = (ROOT_DIR / source_file).resolve()
-        if not candidate.exists() or not candidate.is_relative_to(inbox_root):
+        normalized = source_file.strip("/")
+        if not normalized.startswith("Inbox/"):
+            raise HTTPException(status_code=400, detail=f"Source file not found under Inbox/: {source_file}")
+        if client.get_file(normalized)[0] is None:
             raise HTTPException(status_code=400, detail=f"Source file not found under Inbox/: {source_file}")
 
 
@@ -90,11 +99,7 @@ def create_track(payload: dict[str, Any] = Body(...)) -> dict:
     if invalid_ids:
         raise HTTPException(status_code=400, detail={"invalid_ids": invalid_ids})
 
-    all_topic_ids = {
-        topic.id
-        for area in track.areas
-        for topic in area.topics
-    }
+    all_topic_ids = {topic.id for area in track.areas for topic in area.topics}
     invalid_depends_on: list[str] = []
     for area in track.areas:
         for topic in area.topics:
@@ -111,19 +116,17 @@ def create_track(payload: dict[str, Any] = Body(...)) -> dict:
     saved_files = ["roadmap.json"]
     try:
         roadmap.tracks.append(track)
-        with ROADMAP_PATH.open("w", encoding="utf-8") as file:
-            json.dump(roadmap.model_dump(mode="json"), file, indent=2)
-            file.write("\n")
-
-        commit_sha = commit_and_push(saved_files, f"Add new track: {track.name}")
-        return {"saved_files": saved_files, "commit_sha": commit_sha}
-    except GitOperationError as exc:
+        updated_content = json.dumps(roadmap.model_dump(mode="json"), indent=2) + "\n"
+        commit_result = _get_repo_client().put_multiple_files(
+            [{"path": "roadmap.json", "content": updated_content, "is_binary": False}],
+            f"Add new track: {track.name}",
+        )
+        return {"saved_files": saved_files, "commit_sha": commit_result["commit_sha"]}
+    except Exception as exc:  # pragma: no cover - runtime path for unexpected failures
         return JSONResponse(
             status_code=500,
             content={"error": str(exc), "saved_files": saved_files},
         )
-    except Exception as exc:  # pragma: no cover - runtime path for unexpected failures
-        raise HTTPException(status_code=500, detail=f"Track creation failed: {exc}") from exc
 
 
 @app.get("/tracks/{track_id}", response_model=Track)
@@ -250,9 +253,6 @@ async def approve_note_mapping(
         raise HTTPException(status_code=400, detail="mode is required when the target markdown file already exists")
 
     target_path = markdown_path(track_id, area_id, topic_id)
-    target_file = ROOT_DIR / target_path
-    target_file.parent.mkdir(parents=True, exist_ok=True)
-
     mapped_at = datetime.now(timezone.utc).strftime("%Y-%m-%d")
     new_section = render_markdown_section(source_files, normalized_subtopics, status, str(payload.get("note_text", "")), mapped_at)
 
@@ -266,8 +266,9 @@ async def approve_note_mapping(
         final_content = build_full_markdown(topic.name, [new_section])
 
     saved_files: list[str] = [target_path]
-    # keep consistent with the Git commit semantics: source files are included as part of the saved payload
     saved_files.extend(source_files)
+    commit_files: list[dict[str, Any]] = [{"path": target_path, "content": final_content, "is_binary": False}]
+
     if status == "Done":
         roadmap = load_roadmap()
         for track in roadmap.tracks:
@@ -280,23 +281,18 @@ async def approve_note_mapping(
                     if item.id == topic_id:
                         item.done = True
                         break
-        with ROADMAP_PATH.open("w", encoding="utf-8") as file:
-            json.dump(roadmap.model_dump(mode="json"), file, indent=2)
-            file.write("\n")
+        roadmap_json = json.dumps(roadmap.model_dump(mode="json"), indent=2) + "\n"
+        commit_files.append({"path": "roadmap.json", "content": roadmap_json, "is_binary": False})
         saved_files.append("roadmap.json")
 
-    target_file.write_text(final_content, encoding="utf-8")
-
     try:
-        commit_sha = commit_and_push(saved_files, f"Add notes for {track_id}/{area_id}/{topic_id}")
-        return {"saved_files": saved_files, "commit_sha": commit_sha}
-    except GitOperationError as exc:
+        commit_result = _get_repo_client().put_multiple_files(commit_files, f"Add notes for {track_id}/{area_id}/{topic_id}")
+        return {"saved_files": saved_files, "commit_sha": commit_result["commit_sha"]}
+    except Exception as exc:  # pragma: no cover - runtime path for unexpected failures
         return JSONResponse(
             status_code=500,
             content={"error": str(exc), "saved_files": saved_files},
         )
-    except Exception as exc:  # pragma: no cover - runtime path for unexpected failures
-        raise HTTPException(status_code=500, detail=f"Upload failed: {exc}") from exc
 
 
 @app.post("/tracks/{track_id}/upload")
@@ -316,20 +312,20 @@ async def upload_files(track_id: str, files: list[UploadFile] = File(...)) -> di
         validated.append((file.filename, await file.read()))
 
     saved_files: list[str] = []
+    commit_files: list[dict[str, Any]] = []
     try:
         for filename, content in validated:
-            rel_path = save_upload(track_id, filename, content)
+            rel_path = save_upload(track_id, filename, content, _get_repo_client())
             saved_files.append(rel_path)
+            commit_files.append({"path": rel_path, "content": content, "is_binary": True})
 
-        commit_sha = commit_and_push(saved_files, f"Add {len(saved_files)} file(s) to Inbox/{track_id}")
-        return {"saved_files": saved_files, "commit_sha": commit_sha}
-    except GitOperationError as exc:
+        commit_result = _get_repo_client().put_multiple_files(
+            commit_files,
+            f"Add {len(saved_files)} file(s) to Inbox/{track_id}",
+        )
+        return {"saved_files": saved_files, "commit_sha": commit_result["commit_sha"]}
+    except Exception as exc:  # pragma: no cover - runtime path for push failure logging
         return JSONResponse(
             status_code=500,
             content={"error": str(exc), "saved_files": saved_files},
         )
-    except Exception as exc:  # pragma: no cover - runtime path for push failure logging
-        raise HTTPException(
-            status_code=500,
-            detail=f"Upload saved locally, but git commit/push failed: {exc}",
-        ) from exc
