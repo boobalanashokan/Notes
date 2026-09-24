@@ -17,22 +17,7 @@ Next: Filesystem & shell
 
   - [Linux](Foundations/linux.md)
   - [Networking](Foundations/Networking.md)
-- [Project Tasks](PROJECT_TASKS.md)
-- [Skills](SKILLS.md)
-- [Today](TODAY.md)
-- [Tracker](TRACKER.md)
 <!-- INDEX:END -->
-
-<!-- TRACKERS:START -->
-## Trackers & Notes
-
-- [Complete roadmap](TRACKER.md)
-- [Today's focus](TODAY.md)
-- [Project tasks](PROJECT_TASKS.md)
-- [Skills progress](SKILLS.md)
-
-The Index below contains every Markdown study note and generated tracker file.
-<!-- TRACKERS:END -->
 
 <!-- DETAILED-DASHBOARD:START -->
 ## Detailed Dashboard
