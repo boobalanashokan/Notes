@@ -15,7 +15,10 @@ function AppShell() {
   return (
     <div className="app-shell">
       <nav className="topnav">
-        <div className="brand">Study Tracker</div>
+        <div className="brand" aria-label="StudyTracker brand">
+          <span className="brand-mark">✦</span>
+          <span className="brand-text">Study<span>Tracker</span></span>
+        </div>
 
         <div className="nav-controls">
           <label className="track-switcher" aria-label="Select track">
@@ -36,27 +39,38 @@ function AppShell() {
 
           <div className="nav-links">
             <NavLink to="/" end className={({ isActive }) => (isActive ? 'nav-item active' : 'nav-item')}>
-              Dashboard
+              <span className="nav-icon">⌂</span>
+              <span>Dashboard</span>
             </NavLink>
             <NavLink to="/notes" className={({ isActive }) => (isActive ? 'nav-item active' : 'nav-item')}>
-              Notes
+              <span className="nav-icon">☰</span>
+              <span>Notes</span>
             </NavLink>
             <NavLink to="/roadmap" className={({ isActive }) => (isActive ? 'nav-item active' : 'nav-item')}>
-              Roadmap
+              <span className="nav-icon">◫</span>
+              <span>Roadmap</span>
             </NavLink>
             <NavLink to="/projects" className={({ isActive }) => (isActive ? 'nav-item active' : 'nav-item')}>
-              Projects
+              <span className="nav-icon">▣</span>
+              <span>Projects</span>
             </NavLink>
             <NavLink to="/skills" className={({ isActive }) => (isActive ? 'nav-item active' : 'nav-item')}>
-              Skills
+              <span className="nav-icon">✧</span>
+              <span>Skills</span>
             </NavLink>
             <NavLink to="/add-track" className={({ isActive }) => (isActive ? 'nav-item active' : 'nav-item')}>
-              Add Track
+              <span className="nav-icon">＋</span>
+              <span>Add Track</span>
             </NavLink>
             <NavLink to="/upload" className={({ isActive }) => (isActive ? 'nav-item active' : 'nav-item')}>
-              Upload Notes
+              <span className="nav-icon">⇪</span>
+              <span>Upload Notes</span>
             </NavLink>
           </div>
+        </div>
+
+        <div className="profile-toggle" aria-label="User profile">
+          <span className="profile-dot" />
         </div>
       </nav>
 
