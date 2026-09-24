@@ -45,10 +45,20 @@ function createFileEntry(file) {
   }
 }
 
+function makeManualNoteEntry(noteText = '') {
+  return {
+    id: `manual-${Math.random().toString(36).slice(2, 11)}`,
+    name: 'Manual note.md',
+    savedPath: '',
+    mappings: [{ ...createMapping(), noteText }],
+  }
+}
+
 function UploadNotes() {
   const { trackId, loading: tracksLoading } = useTrack()
   const [track, setTrack] = useState(null)
   const [selectedFiles, setSelectedFiles] = useState([])
+  const [manualNoteText, setManualNoteText] = useState('')
   const [dragActive, setDragActive] = useState(false)
   const [uploadLoading, setUploadLoading] = useState(false)
   const [uploadError, setUploadError] = useState('')
@@ -204,6 +214,21 @@ function UploadNotes() {
         }
       }),
     }))
+  }
+
+  const addManualNote = () => {
+    const trimmedNote = manualNoteText.trim()
+    if (!trimmedNote) {
+      setUploadError('Write a note before adding it to the mapping list.')
+      return
+    }
+
+    setUploadError('')
+    setUploadedFileEntries((current) => [
+      ...current,
+      makeManualNoteEntry(trimmedNote),
+    ])
+    setManualNoteText('')
   }
 
   const handleUpload = async () => {
@@ -394,6 +419,24 @@ function UploadNotes() {
           </label>
         </div>
 
+        <div className="card note-editor-card">
+          <h3>Write note directly</h3>
+          <p className="page-subtitle">Use Markdown so it stays readable later, for example: # Topic, ## Notes, - bullet list, or code fences.</p>
+          <textarea
+            value={manualNoteText}
+            onChange={(event) => setManualNoteText(event.target.value)}
+            rows={8}
+            placeholder="# My notes\n\n## What I learned\n- topic one\n- topic two\n\n```bash\nls -la\n```"
+          />
+          <button
+            type="button"
+            className="secondary-button"
+            onClick={addManualNote}
+          >
+            Add typed note
+          </button>
+        </div>
+
         {selectedFiles.length > 0 && (
           <div className="selection-panel">
             <h3>Selected files</h3>
@@ -545,8 +588,8 @@ function UploadNotes() {
                       onChange={(event) =>
                         updateMapping(file.id, mapping.id, { noteText: event.target.value })
                       }
-                      rows={5}
-                      placeholder="Add detail about what you learned or what to revisit."
+                      rows={7}
+                      placeholder="# Topic summary\n\n## Notes\n- What I learned\n- What to revisit\n\n```bash\n# code example\n```"
                       disabled={!mapping.areaId || !mapping.topicId}
                     />
                   </label>
