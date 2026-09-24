@@ -7,7 +7,14 @@ from typing import List
 import git
 from dotenv import load_dotenv
 
-load_dotenv(dotenv_path=Path(__file__).resolve().parent / ".env")
+ENV_PATH = Path(__file__).resolve().parent / ".env"
+load_dotenv(dotenv_path=ENV_PATH, override=True)
+
+token = os.getenv("GITHUB_TOKEN", "").strip()
+if token:
+    print(f"Loaded GITHUB_TOKEN (length: {len(token)} chars)")
+else:
+    print("Loaded GITHUB_TOKEN (length: 0 chars)")
 
 
 class GitOperationError(RuntimeError):
@@ -23,6 +30,29 @@ def _get_env(name: str) -> str:
 
 def _repo_root() -> Path:
     return Path(_get_env("GITHUB_REPO_PATH")).resolve()
+
+
+def _build_authenticated_remote_url(remote_url: str, token: str) -> str:
+    if remote_url.startswith("https://"):
+        return remote_url.replace("https://", f"https://x-access-token:{token}@", 1)
+    if remote_url.startswith("http://"):
+        return remote_url.replace("http://", f"http://x-access-token:{token}@", 1)
+    if remote_url.startswith("git@"):
+        host_and_path = remote_url.split("@", 1)[1]
+        if ":" in host_and_path:
+            host, repo_path = host_and_path.split(":", 1)
+            return f"https://x-access-token:{token}@{host}/{repo_path}"
+        return f"https://x-access-token:{token}@{host_and_path}"
+    if remote_url.startswith("ssh://"):
+        ssh_prefix = "ssh://"
+        without_prefix = remote_url[len(ssh_prefix) :]
+        if "@" in without_prefix:
+            user_host, repo_path = without_prefix.split("@", 1)
+            host_and_repo = repo_path
+            if host_and_repo.startswith("/"):
+                return f"https://x-access-token:{token}@{user_host}/{host_and_repo.lstrip('/')}"
+            return f"https://x-access-token:{token}@{host_and_repo}"
+    raise GitOperationError(f"Unsupported remote URL format: {remote_url}")
 
 
 def commit_and_push(file_paths: List[str], message: str) -> str:
@@ -61,18 +91,10 @@ def commit_and_push(file_paths: List[str], message: str) -> str:
 
     remote = repo.remotes[remote_name]
     remote_url = remote.url
-    if remote_url.startswith("https://"):
-        remote.set_url(f"https://x-access-token:{token}@{remote_url.split('https://', 1)[1]}")
-    elif remote_url.startswith("http://"):
-        remote.set_url(f"http://x-access-token:{token}@{remote_url.split('http://', 1)[1]}")
-    elif remote_url.startswith("git@"):
-        host_and_path = remote_url.split("@", 1)[1]
-        remote.set_url(f"https://x-access-token:{token}@{host_and_path}")
-    else:
-        raise GitOperationError(f"Unsupported remote URL format: {remote_url}")
+    authed_url = _build_authenticated_remote_url(remote_url, token)
 
     try:
-        remote.push(refspec=f"HEAD:{branch_name}")
+        repo.git.push(authed_url, f"HEAD:{branch_name}")
     except git.exc.GitCommandError as exc:
         raise GitOperationError(f"Push rejected: {exc.stderr or exc}") from exc
 

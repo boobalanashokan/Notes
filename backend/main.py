@@ -2,8 +2,9 @@ from __future__ import annotations
 
 from fastapi import FastAPI, File, HTTPException, UploadFile
 from fastapi.middleware.cors import CORSMiddleware
+from fastapi.responses import JSONResponse
 
-from git_service import commit_and_push
+from git_service import GitOperationError, commit_and_push
 from models import Track
 from roadmap_service import compute_track_stats, get_track, load_roadmap
 from upload_service import save_upload
@@ -70,8 +71,13 @@ async def upload_files(track_id: str, files: list[UploadFile] = File(...)) -> di
 
         commit_sha = commit_and_push(saved_files, f"Add {len(saved_files)} file(s) to Inbox/{track_id}")
         return {"saved_files": saved_files, "commit_sha": commit_sha}
-    except Exception as exc:  # pragma: no cover - runtime path for push failure logging
+    except GitOperationError as exc:
+        return JSONResponse(
+            status_code=500,
+            content={"error": str(exc), "saved_files": saved_files},
+        )
+    except Exception as exc:  # pragma: no cover - runtime path for unexpected failures
         raise HTTPException(
             status_code=500,
-            detail=f"Upload saved locally, but git commit/push failed: {exc}",
+            detail=f"Upload failed: {exc}",
         ) from exc
