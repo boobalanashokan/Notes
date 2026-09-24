@@ -1,10 +1,11 @@
 import { useEffect, useState } from 'react'
-import { getTrackStats } from '../api'
+import { getTrack, getTrackStats } from '../api'
 import { useTrack } from '../TrackContext'
 
 function Dashboard() {
   const { trackId, trackName, loading: tracksLoading } = useTrack()
   const [stats, setStats] = useState(null)
+  const [track, setTrack] = useState(null)
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState('')
 
@@ -16,17 +17,23 @@ function Dashboard() {
 
     let ignore = false
 
-    async function loadStats() {
+    async function loadDashboardData() {
       try {
         setLoading(true)
-        const data = await getTrackStats(trackId)
+        const [statsData, trackData] = await Promise.all([
+          getTrackStats(trackId),
+          getTrack(trackId),
+        ])
+
         if (!ignore) {
-          setStats(data)
+          setStats(statsData)
+          setTrack(trackData)
           setError('')
         }
       } catch (err) {
         if (!ignore) {
           setStats(null)
+          setTrack(null)
           setError('Could not reach backend — is it running on port 8000?')
         }
       } finally {
@@ -36,7 +43,7 @@ function Dashboard() {
       }
     }
 
-    loadStats()
+    loadDashboardData()
     return () => {
       ignore = true
     }
@@ -51,7 +58,22 @@ function Dashboard() {
   }
 
   const progressValue = Math.round(stats.percent_complete || 0)
-  const weeklyProgress = [0, 0, 0, 0, 0, 0, 0]
+  const topicList = track?.areas?.flatMap((area) => area.topics.map((topic) => ({ ...topic, area_name: area.name }))) || []
+  const weeksInTracker = topicList.length ? Math.max(...topicList.map((topic) => Number(topic.week) || 0)) : 0
+  const nextTopic = topicList.find((topic) => !topic.done) || null
+  const levelValue = Math.max(1, Math.min(99, Math.floor((stats.completed_topics / Math.max(stats.total_topics, 1)) * 100 / 12) + 1))
+
+  const nextUpBadge = stats.remaining_topics === 0 ? 'Completed' : 'Next milestone'
+  const nextUpTitle = nextTopic
+    ? nextTopic.name
+    : stats.remaining_topics === 0
+      ? 'Track complete'
+      : 'No topics available yet'
+  const nextUpCopy = nextTopic
+    ? `${nextTopic.area_name} · Week ${nextTopic.week}`
+    : stats.remaining_topics === 0
+      ? 'Everything in this track is complete.'
+      : 'Start your learning journey by adding your first topic.'
 
   return (
     <div className="dashboard-layout">
@@ -60,8 +82,8 @@ function Dashboard() {
           <div className="hero-copy">
             <p className="eyebrow">{(trackName || 'MLOps').toUpperCase()} TRACK</p>
             <div className="hero-badges">
-              <span className="fun-badge level-badge">✨ Level 3</span>
-              <span className="fun-badge streak-badge">🔥 12-day streak</span>
+              <span className="fun-badge level-badge">✨ Level {levelValue}</span>
+              <span className="fun-badge streak-badge">⏱ {weeksInTracker} weeks in track</span>
             </div>
             <h1>
               Keep going,<br />
@@ -69,9 +91,9 @@ function Dashboard() {
             </h1>
             <p className="hero-subtitle">Small steps every day build big skills. You&apos;ve got this.</p>
             <div className="quick-pills" aria-label="Learning focus options">
-              <span className="focus-pill">Deep work</span>
-              <span className="focus-pill">Practice</span>
-              <span className="focus-pill">Review</span>
+              <span className="focus-pill">{stats.completed_topics} complete</span>
+              <span className="focus-pill">{stats.remaining_topics} left</span>
+              <span className="focus-pill">{progressValue}% pace</span>
             </div>
             <button className="primary-cta" type="button">
               <span className="cta-icon">▶</span>
@@ -161,7 +183,7 @@ function Dashboard() {
 
       <aside className="sidebar-column">
         <section className="panel nextup-panel">
-          <div className="panel-badge">Recommended</div>
+          <div className="panel-badge">{nextUpBadge}</div>
           <div className="sidebar-title-row">
             <span className="sidebar-symbol">◐</span>
             <h3>Next up</h3>
@@ -171,30 +193,30 @@ function Dashboard() {
             <div className="mountains mountains-back" />
             <div className="mountains mountains-front" />
           </div>
-          <p>No topics available yet</p>
-          <p className="sidebar-copy">Start your MLOps journey by exploring your first topic.</p>
-          <button className="secondary-cta" type="button">Go to Roadmap</button>
+          <p>{nextUpTitle}</p>
+          <p className="sidebar-copy">{nextUpCopy}</p>
+          <button className="secondary-cta" type="button">{stats.remaining_topics === 0 ? 'Review roadmap' : 'Go to Roadmap'}</button>
         </section>
 
         <section className="panel weekly-panel">
           <div className="sidebar-title-row weekly-row">
             <span className="sidebar-symbol">◫</span>
-            <h3>Weekly Consistency</h3>
-            <span className="week-streak">0 day streak</span>
+            <h3>Track momentum</h3>
           </div>
 
-          <div className="week-grid">
-            {['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'].map((day, index) => (
-              <div key={day} className="week-day">
-                <div className={`day-dot ${weeklyProgress[index] ? 'filled' : ''}`} aria-label={`${day} progress`} />
-                <span>{day}</span>
-              </div>
-            ))}
-          </div>
-
-          <div className="consistency-footer">
-            <span className="consistency-icon">◎</span>
-            <span>Consistency compounds. Show up this week!</span>
+          <div className="momentum-grid">
+            <div className="momentum-item">
+              <span className="momentum-label">Weeks in tracker</span>
+              <strong>{weeksInTracker}</strong>
+            </div>
+            <div className="momentum-item">
+              <span className="momentum-label">Completed</span>
+              <strong>{stats.completed_topics}</strong>
+            </div>
+            <div className="momentum-item full-width">
+              <span className="momentum-label">Current focus</span>
+              <strong>{nextTopic ? nextTopic.name : 'No active topic'}</strong>
+            </div>
           </div>
         </section>
       </aside>

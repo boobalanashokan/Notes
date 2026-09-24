@@ -730,61 +730,37 @@ select {
   margin: 0.2rem 0 1.4rem;
 }
 
-.week-streak {
-  color: var(--muted);
-  font-size: 0.78rem;
-  font-weight: 600;
-}
-
-.week-grid {
+.momentum-grid {
   display: grid;
-  grid-template-columns: repeat(7, minmax(0, 1fr));
-  gap: 0.55rem;
-  align-items: end;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 0.8rem;
 }
 
-.week-day {
+.momentum-item {
   display: flex;
   flex-direction: column;
-  align-items: center;
-  gap: 0.5rem;
-  color: var(--text-300);
+  gap: 0.35rem;
+  padding: 0.8rem 0.7rem;
+  border-radius: 0.9rem;
+  background: rgba(17, 28, 39, 0.72);
+  border: 1px solid rgba(148, 163, 184, 0.12);
+}
+
+.momentum-item strong {
+  color: var(--text-100);
+  font-size: 1.2rem;
+  letter-spacing: -0.04em;
+}
+
+.momentum-label {
+  color: var(--muted);
   font-size: 0.72rem;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
 }
 
-.day-dot {
-  width: 2.2rem;
-  height: 2.2rem;
-  border-radius: 50%;
-  background: rgba(151, 170, 194, 0.12);
-  border: 1px solid rgba(148, 163, 184, 0.18);
-}
-
-.day-dot.filled {
-  background: rgba(94, 166, 255, 0.2);
-  box-shadow: inset 0 0 0 1px rgba(94, 166, 255, 0.28);
-}
-
-.consistency-footer {
-  display: flex;
-  align-items: center;
-  gap: 0.65rem;
-  margin-top: 1.2rem;
-  padding-top: 1rem;
-  border-top: 1px solid rgba(148, 163, 184, 0.12);
-  color: var(--text-200);
-  font-size: 0.92rem;
-}
-
-.consistency-icon {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  width: 2rem;
-  height: 2rem;
-  border-radius: 50%;
-  background: rgba(94, 166, 255, 0.1);
-  border: 1px solid rgba(94, 166, 255, 0.18);
+.momentum-item.full-width {
+  grid-column: 1 / -1;
 }
 
 @media (max-width: 1160px) {
