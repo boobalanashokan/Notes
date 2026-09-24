@@ -1,4 +1,4 @@
-```powershell
+
 $ErrorActionPreference = "Stop"
 
 Write-Host "========================================"
