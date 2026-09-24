@@ -31,22 +31,6 @@ Next: Filesystem & shell
 #### Pages
 
   - [Readme](frontend/README.md)
-## Inbox
-
-### Mlops
-
-#### 2026 09 24
-
-## Notes
-
-### Mlops
-
-#### Docker
-
-      - [Docker Fundamentals](Notes/mlops/docker/docker-fundamentals.md)
-#### Portfolio
-
-      - [Interview Readiness](Notes/mlops/portfolio/interview-readiness.md)
 <!-- INDEX:END -->
 
 <!-- DETAILED-DASHBOARD:START -->
