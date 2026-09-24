@@ -1,28 +1,27 @@
 # Skills Progress
 
-> Automatically generated from the roadmap. No week-by-week dashboard is
-> included.
+> Automatically generated from `roadmap.json`.
 
-  Area              Units   Done   Progress What this proves
-  --------------- ------- ------ ---------- -------------------------------------
-  Linux               ---    ---        --- Calculated by `scripts/tracker.py`.
-  Networking          ---    ---        --- Calculated by `scripts/tracker.py`.
-  Git                 ---    ---        --- Calculated by `scripts/tracker.py`.
-  GCP                 ---    ---        --- Calculated by `scripts/tracker.py`.
-  CI/CD               ---    ---        --- Calculated by `scripts/tracker.py`.
-  Security            ---    ---        --- Calculated by `scripts/tracker.py`.
-  Python              ---    ---        --- Calculated by `scripts/tracker.py`.
-  Testing             ---    ---        --- Calculated by `scripts/tracker.py`.
-  Quality             ---    ---        --- Calculated by `scripts/tracker.py`.
-  FastAPI             ---    ---        --- Calculated by `scripts/tracker.py`.
-  Docker              ---    ---        --- Calculated by `scripts/tracker.py`.
-  MLflow              ---    ---        --- Calculated by `scripts/tracker.py`.
-  ML                  ---    ---        --- Calculated by `scripts/tracker.py`.
-  Terraform           ---    ---        --- Calculated by `scripts/tracker.py`.
-  Kubernetes          ---    ---        --- Calculated by `scripts/tracker.py`.
-  GKE                 ---    ---        --- Calculated by `scripts/tracker.py`.
-  Airflow             ---    ---        --- Calculated by `scripts/tracker.py`.
-  Monitoring          ---    ---        --- Calculated by `scripts/tracker.py`.
-  ML Monitoring       ---    ---        --- Calculated by `scripts/tracker.py`.
-  Hardening           ---    ---        --- Calculated by `scripts/tracker.py`.
-  Portfolio           ---    ---        --- Calculated by `scripts/tracker.py`.
+| Area          | Units | Done | Progress |
+| ------------- | ----- | ---- | -------- |
+| Linux         | 8     | 0    | 0%       |
+| Networking    | 4     | 0    | 0%       |
+| Git           | 2     | 0    | 0%       |
+| GCP           | 8     | 0    | 0%       |
+| CI/CD         | 7     | 0    | 0%       |
+| Security      | 4     | 0    | 0%       |
+| Python        | 4     | 0    | 0%       |
+| Testing       | 1     | 0    | 0%       |
+| Quality       | 1     | 0    | 0%       |
+| FastAPI       | 3     | 0    | 0%       |
+| Docker        | 3     | 0    | 0%       |
+| MLflow        | 6     | 0    | 0%       |
+| ML            | 1     | 0    | 0%       |
+| Terraform     | 6     | 0    | 0%       |
+| Kubernetes    | 8     | 0    | 0%       |
+| GKE           | 1     | 0    | 0%       |
+| Airflow       | 3     | 0    | 0%       |
+| Monitoring    | 3     | 0    | 0%       |
+| ML Monitoring | 4     | 0    | 0%       |
+| Hardening     | 2     | 0    | 0%       |
+| Portfolio     | 2     | 0    | 0%       |
