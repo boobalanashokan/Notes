@@ -30,15 +30,66 @@ HEADING_RE = re.compile(r"(?im)^\s*#{1,6}\s+(?P<text>.+?)\s*$")
 CHECKBOX_RE = re.compile(r"(?im)^\s*[-*]\s*\[(?P<mark>[ xX])\]\s+(?P<text>.+?)\s*$")
 
 
-def load_roadmap() -> list[dict]:
+def flatten_roadmap(roadmap: dict | list) -> list[dict]:
+    """Return the roadmap as a flat list of topic records while preserving track/area metadata."""
+    if isinstance(roadmap, list):
+        flat = []
+        for row in roadmap:
+            if not isinstance(row, dict):
+                continue
+            flat.append({**row, "area": row.get("area"), "track_id": row.get("track_id"), "track_name": row.get("track_name"), "area_id": row.get("area_id"), "area_name": row.get("area_name")})
+        return flat
+
+    if not isinstance(roadmap, dict) or "tracks" not in roadmap:
+        raise SystemExit(f"{ROADMAP.name} must contain a nested 'tracks' structure")
+
+    flat: list[dict] = []
+    for track in roadmap.get("tracks", []):
+        track_id = str(track.get("id", "")).strip()
+        track_name = str(track.get("name", "")).strip()
+        for area in track.get("areas", []):
+            area_id = str(area.get("id", "")).strip()
+            area_name = str(area.get("name", "")).strip()
+            for topic in area.get("topics", []):
+                flat.append({
+                    "id": topic.get("id"),
+                    "track_id": track_id,
+                    "track_name": track_name,
+                    "area_id": area_id,
+                    "area": area_name,
+                    "area_name": area_name,
+                    "topic": topic.get("name"),
+                    "week": topic.get("week"),
+                    "type": topic.get("type"),
+                    "subtopics": topic.get("subtopics", []),
+                    "learning_outcome": topic.get("learning_outcome", ""),
+                    "project_task": topic.get("project_task", ""),
+                    "depends_on": topic.get("depends_on", []),
+                    "done": bool(topic.get("done", False)),
+                })
+    return flat
+
+
+def load_roadmap(track_id: str | None = None) -> list[dict]:
     try:
         data = json.loads(ROADMAP.read_text(encoding="utf-8"))
     except (OSError, json.JSONDecodeError) as error:
         raise SystemExit(f"Could not load {ROADMAP.name}: {error}") from error
-    ids = [row.get("id") for row in data] if isinstance(data, list) else []
-    if not data or any(not row.get("id") or not row.get("topic") for row in data) or len(ids) != len(set(ids)):
+
+    if isinstance(data, list):
+        flat = flatten_roadmap(data)
+    elif isinstance(data, dict):
+        flat = flatten_roadmap(data)
+    else:
+        raise SystemExit(f"{ROADMAP.name} must contain a roadmap object or list")
+
+    ids = [row.get("id") for row in flat]
+    if not flat or any(not row.get("id") or not row.get("topic") for row in flat) or len(ids) != len(set(ids)):
         raise SystemExit(f"{ROADMAP.name} must contain a non-empty list with unique IDs and topics")
-    return data
+
+    if track_id and track_id not in ("all", "ALL"):
+        flat = [row for row in flat if str(row.get("track_id") or row.get("track_name") or "").lower() == str(track_id).lower()]
+    return flat
 
 
 def normalize(value: str) -> str:
@@ -121,7 +172,15 @@ def update_derived_views(roadmap: list[dict]) -> None:
     rows = [row for row in roadmap if not row["done"]][:12]
     TODAY.write_text("# Today\n\n> Automatically generated from the first incomplete roadmap units.\n\n" + "\n".join(f"- [ ] **{row['id']} - {row['area']} - {row['topic']}** - {row['project_task']}" for row in rows) + ("\n" if rows else "All roadmap units are complete.\n"), encoding="utf-8")
     task_rows = [["ID", "Week", "Area", "Topic", "Project Task", "Depends On", "Done?"]]
-    task_rows += [[row["id"], str(row["week"]), row["area"], row["topic"], row["project_task"], row.get("depends_on") or "-", "x" if row["done"] else ""] for row in roadmap if row["type"].lower() == "build"]
+    task_rows += [[
+        row["id"],
+        str(row["week"]),
+        row["area"],
+        row["topic"],
+        row["project_task"],
+        ", ".join(str(item) for item in (row.get("depends_on") or [])) or "-",
+        "x" if row["done"] else "",
+    ] for row in roadmap if row["type"].lower() == "build"]
     PROJECT_TASKS.write_text("# Project Tasks\n\n> Automatically generated from `roadmap.json`.\n\n" + table(task_rows) + "\n", encoding="utf-8")
     skill_rows = [["Area", "Units", "Done", "Progress"]]
     for area in dict.fromkeys(row["area"] for row in roadmap):
@@ -155,8 +214,8 @@ def update_index() -> None:
     README.write_text(readme, encoding="utf-8")
 
 
-def generate() -> tuple[int, int]:
-    roadmap = load_roadmap()
+def generate(track_id: str | None = None) -> tuple[int, int]:
+    roadmap = load_roadmap(track_id)
     note_state = scan_notes(roadmap)
     for row in roadmap:
         row["done"] = note_state[row["id"]]
@@ -171,9 +230,11 @@ def generate() -> tuple[int, int]:
 def main() -> None:
     parser = argparse.ArgumentParser(description="Generate tracker views from study notes")
     parser.add_argument("--check", action="store_true", help="fail when generated files are stale")
+    parser.add_argument("--track", default="mlops", help="only process a specific track id (default: mlops; use --track all to process everything)")
     args = parser.parse_args()
+    track_filter = None if str(args.track).lower() in {"", "all"} else str(args.track)
     before = {path: path.read_bytes() if path.exists() else None for path in GENERATED_FILES}
-    total, completed = generate()
+    total, completed = generate(track_filter)
     changed = [path for path in GENERATED_FILES if before[path] != path.read_bytes()]
     if args.check and changed:
         print("Generated files are stale: " + ", ".join(path.name for path in changed), file=sys.stderr)

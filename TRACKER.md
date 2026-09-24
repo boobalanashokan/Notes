@@ -12,7 +12,7 @@ A note existing by itself never marks work complete.
 
 ## Complete Roadmap
 
-### T1 - Week 1 - Linux - Filesystem & shell
+### filesystem-shell - Week 1 - Linux - Filesystem & shell
 
 - **Type:** Learn
 - **Done?:** [ ]
@@ -28,11 +28,11 @@ A note existing by itself never marks work complete.
   - wildcards and quoting
 - **Project Task:** Create repo setup notes and a shell script that creates the project structure.
 
-### T2 - Week 1 - Linux - Environment & configuration
+### environment-configuration - Week 1 - Linux - Environment & configuration
 
 - **Type:** Learn
 - **Done?:** [ ]
-- **Depends On:** T1
+- **Depends On:** ['filesystem-shell']
 - **Learning / Outcome:** Understand and be able to explain: environment variables, PATH, .env files, export / unset.
 - **Subtopics to Learn:
   - environment variables
@@ -43,11 +43,11 @@ A note existing by itself never marks work complete.
   - exit codes
 - **Project Task:** Create a local configuration pattern for the project; keep secrets out of Git.
 
-### T3 - Week 1 - Linux - Processes
+### processes - Week 1 - Linux - Processes
 
 - **Type:** Learn
 - **Done?:** [ ]
-- **Depends On:** T2
+- **Depends On:** ['environment-configuration']
 - **Learning / Outcome:** Understand and be able to explain: ps, top / htop, kill / pkill, background jobs.
 - **Subtopics to Learn:
   - ps
@@ -58,11 +58,11 @@ A note existing by itself never marks work complete.
   - process ownership
 - **Project Task:** Run the FastAPI prototype as a process and practice stopping/restarting it.
 
-### T4 - Week 1 - Linux - Logs & services
+### logs-services - Week 1 - Linux - Logs & services
 
 - **Type:** Build
 - **Done?:** [ ]
-- **Depends On:** T3
+- **Depends On:** ['processes']
 - **Learning / Outcome:** Understand and be able to explain: journalctl, systemctl, service lifecycle, stdout vs stderr.
 - **Subtopics to Learn:
   - journalctl
@@ -72,11 +72,11 @@ A note existing by itself never marks work complete.
   - log files
 - **Project Task:** Intentionally create a failing local service and document how you diagnose it.
 
-### T5 - Week 2 - Linux - Permissions
+### permissions - Week 2 - Linux - Permissions
 
 - **Type:** Learn
 - **Done?:** [ ]
-- **Depends On:** T4
+- **Depends On:** ['logs-services']
 - **Learning / Outcome:** Understand and be able to explain: users and groups, chmod, chown, read/write/execute.
 - **Subtopics to Learn:
   - users and groups
@@ -87,11 +87,11 @@ A note existing by itself never marks work complete.
   - least privilege
 - **Project Task:** Fix permissions on a project directory without using broad 777 permissions.
 
-### T6 - Week 2 - Linux - SSH
+### ssh - Week 2 - Linux - SSH
 
 - **Type:** Learn
 - **Done?:** [ ]
-- **Depends On:** T5
+- **Depends On:** ['permissions']
 - **Learning / Outcome:** Understand and be able to explain: SSH keys, known_hosts, scp, port basics.
 - **Subtopics to Learn:
   - SSH keys
@@ -101,11 +101,11 @@ A note existing by itself never marks work complete.
   - remote command execution
 - **Project Task:** Connect to a test VM and transfer a project artifact securely.
 
-### T7 - Week 2 - Linux - System troubleshooting
+### system-troubleshooting - Week 2 - Linux - System troubleshooting
 
 - **Type:** Build
 - **Done?:** [ ]
-- **Depends On:** T6
+- **Depends On:** ['ssh']
 - **Learning / Outcome:** Understand and be able to explain: disk: df / du, memory: free, CPU/process inspection, logs.
 - **Subtopics to Learn:
   - disk: df / du
@@ -116,11 +116,11 @@ A note existing by itself never marks work complete.
   - curl health checks
 - **Project Task:** Create a troubleshooting checklist and use it against a deliberately broken service.
 
-### T8 - Week 2 - Linux - Bash automation
+### bash-automation - Week 2 - Linux - Bash automation
 
 - **Type:** Build
 - **Done?:** [ ]
-- **Depends On:** T7
+- **Depends On:** ['system-troubleshooting']
 - **Learning / Outcome:** Understand and be able to explain: variables, arguments, if conditions, loops.
 - **Subtopics to Learn:
   - variables
@@ -132,11 +132,11 @@ A note existing by itself never marks work complete.
   - exit codes
 - **Project Task:** Write scripts for setup, tests, and local service startup.
 
-### T9 - Week 3 - Networking - Networking fundamentals
+### networking-fundamentals - Week 3 - Networking - Networking fundamentals
 
 - **Type:** Learn
 - **Done?:** [ ]
-- **Depends On:** T8
+- **Depends On:** ['bash-automation']
 - **Learning / Outcome:** Understand and be able to explain: IPv4 basics, private vs public IP, subnets, ports.
 - **Subtopics to Learn:
   - IPv4 basics
@@ -147,11 +147,11 @@ A note existing by itself never marks work complete.
   - client/server
 - **Project Task:** Draw the network path for a user request to the model API.
 
-### T10 - Week 3 - Networking - DNS
+### dns - Week 3 - Networking - DNS
 
 - **Type:** Learn
 - **Done?:** [ ]
-- **Depends On:** T9
+- **Depends On:** ['networking-fundamentals']
 - **Learning / Outcome:** Understand and be able to explain: domain names, DNS lookup, A/AAAA records, DNS caching.
 - **Subtopics to Learn:
   - domain names
@@ -161,11 +161,11 @@ A note existing by itself never marks work complete.
   - localhost
 - **Project Task:** Use DNS tools to troubleshoot a sample service hostname.
 
-### T11 - Week 3 - Networking - HTTP/HTTPS
+### http-https - Week 3 - Networking - HTTP/HTTPS
 
 - **Type:** Learn
 - **Done?:** [ ]
-- **Depends On:** T10
+- **Depends On:** ['dns']
 - **Learning / Outcome:** Understand and be able to explain: methods, status codes, headers, JSON.
 - **Subtopics to Learn:
   - methods
@@ -176,11 +176,11 @@ A note existing by itself never marks work complete.
   - request/response lifecycle
 - **Project Task:** Test FastAPI endpoints with curl and inspect requests/responses.
 
-### T12 - Week 3 - Networking - Service networking
+### service-networking - Week 3 - Networking - Service networking
 
 - **Type:** Learn
 - **Done?:** [ ]
-- **Depends On:** T11
+- **Depends On:** ['http-https']
 - **Learning / Outcome:** Understand and be able to explain: firewalls, NAT, reverse proxy, load balancer.
 - **Subtopics to Learn:
   - firewalls
@@ -190,11 +190,11 @@ A note existing by itself never marks work complete.
   - health checks
 - **Project Task:** Document how traffic reaches the inference service.
 
-### T13 - Week 3 - Git - Git fundamentals refresh
+### git-fundamentals-refresh - Week 3 - Git - Git fundamentals refresh
 
 - **Type:** Learn
 - **Done?:** [ ]
-- **Depends On:** T12
+- **Depends On:** ['service-networking']
 - **Learning / Outcome:** Understand and be able to explain: branch, merge, rebase, remote.
 - **Subtopics to Learn:
   - branch
@@ -206,11 +206,11 @@ A note existing by itself never marks work complete.
   - log
 - **Project Task:** Create a clean branching workflow for the project.
 
-### T14 - Week 3 - Git - Git recovery
+### git-recovery - Week 3 - Git - Git recovery
 
 - **Type:** Build
 - **Done?:** [ ]
-- **Depends On:** T13
+- **Depends On:** ['git-fundamentals-refresh']
 - **Learning / Outcome:** Understand and be able to explain: revert vs reset, restore, stash, conflict resolution.
 - **Subtopics to Learn:
   - revert vs reset
@@ -220,11 +220,11 @@ A note existing by itself never marks work complete.
   - bisect
 - **Project Task:** Create and recover from a deliberately bad commit.
 
-### T15 - Week 4 - GCP - Compute Engine
+### compute-engine - Week 4 - GCP - Compute Engine
 
 - **Type:** Refresh
 - **Done?:** [ ]
-- **Depends On:** T14
+- **Depends On:** ['git-recovery']
 - **Learning / Outcome:** Understand and be able to explain: VM lifecycle, SSH, machine types, disks.
 - **Subtopics to Learn:
   - VM lifecycle
@@ -235,11 +235,11 @@ A note existing by itself never marks work complete.
   - service accounts
 - **Project Task:** Create a small test VM and deploy a simple service manually.
 
-### T16 - Week 4 - GCP - Cloud Storage
+### cloud-storage - Week 4 - GCP - Cloud Storage
 
 - **Type:** Refresh
 - **Done?:** [ ]
-- **Depends On:** T15
+- **Depends On:** ['compute-engine']
 - **Learning / Outcome:** Understand and be able to explain: buckets, objects, permissions, regional choices.
 - **Subtopics to Learn:
   - buckets
@@ -249,11 +249,11 @@ A note existing by itself never marks work complete.
   - CLI operations
 - **Project Task:** Store a sample dataset/model artifact in GCS.
 
-### T17 - Week 4 - GCP - BigQuery
+### bigquery - Week 4 - GCP - BigQuery
 
 - **Type:** Refresh
 - **Done?:** [ ]
-- **Depends On:** T16
+- **Depends On:** ['cloud-storage']
 - **Learning / Outcome:** Understand and be able to explain: datasets, tables, schemas, partitioning basics.
 - **Subtopics to Learn:
   - datasets
@@ -264,11 +264,11 @@ A note existing by itself never marks work complete.
   - Python client
 - **Project Task:** Load the public/synthetic project data into BigQuery.
 
-### T18 - Week 4 - GCP - IAM
+### iam - Week 4 - GCP - IAM
 
 - **Type:** Refresh
 - **Done?:** [ ]
-- **Depends On:** T17
+- **Depends On:** ['bigquery']
 - **Learning / Outcome:** Understand and be able to explain: principals, roles, permissions, predefined vs custom roles.
 - **Subtopics to Learn:
   - principals
@@ -278,11 +278,11 @@ A note existing by itself never marks work complete.
   - least privilege
 - **Project Task:** Design the service-account permissions for training and deployment.
 
-### T19 - Week 4 - GCP - Service accounts
+### service-accounts - Week 4 - GCP - Service accounts
 
 - **Type:** Refresh
 - **Done?:** [ ]
-- **Depends On:** T18
+- **Depends On:** ['iam']
 - **Learning / Outcome:** Understand and be able to explain: service account identity, impersonation, attached service accounts, key risks.
 - **Subtopics to Learn:
   - service account identity
@@ -291,11 +291,11 @@ A note existing by itself never marks work complete.
   - key risks
 - **Project Task:** Create separate identities for CI and runtime.
 
-### T20 - Week 4 - GCP - VPC & firewall
+### vpc-firewall - Week 4 - GCP - VPC & firewall
 
 - **Type:** Refresh
 - **Done?:** [ ]
-- **Depends On:** T19
+- **Depends On:** ['service-accounts']
 - **Learning / Outcome:** Understand and be able to explain: VPC, subnets, firewall rules, ingress/egress.
 - **Subtopics to Learn:
   - VPC
@@ -305,11 +305,11 @@ A note existing by itself never marks work complete.
   - private networking
 - **Project Task:** Document the network/security boundary for the project.
 
-### T21 - Week 4 - GCP - Logging & Monitoring
+### logging-monitoring - Week 4 - GCP - Logging & Monitoring
 
 - **Type:** Refresh
 - **Done?:** [ ]
-- **Depends On:** T20
+- **Depends On:** ['vpc-firewall']
 - **Learning / Outcome:** Understand and be able to explain: Cloud Logging, log severity, structured logs, basic metrics.
 - **Subtopics to Learn:
   - Cloud Logging
@@ -319,11 +319,24 @@ A note existing by itself never marks work complete.
   - alerts
 - **Project Task:** Send application logs to Cloud Logging and inspect them.
 
-### T22 - Week 5 - CI/CD - GitHub Actions fundamentals
+### artifact-registry - Week 5 - GCP - Artifact Registry
+
+- **Type:** Build
+- **Done?:** [ ]
+- **Depends On:** ['oidc-keyless-gcp-auth']
+- **Learning / Outcome:** Understand and be able to explain: repositories, Docker auth, image tags, immutability concepts.
+- **Subtopics to Learn:
+  - repositories
+  - Docker auth
+  - image tags
+  - immutability concepts
+- **Project Task:** Build and push the project image to Artifact Registry.
+
+### github-actions-fundamentals - Week 5 - CI/CD - GitHub Actions fundamentals
 
 - **Type:** Refresh
 - **Done?:** [ ]
-- **Depends On:** T21
+- **Depends On:** ['logging-monitoring']
 - **Learning / Outcome:** Understand and be able to explain: workflow YAML, events, jobs, steps.
 - **Subtopics to Learn:
   - workflow YAML
@@ -335,11 +348,11 @@ A note existing by itself never marks work complete.
   - secrets
 - **Project Task:** Rebuild a CI workflow from an empty YAML file.
 
-### T23 - Week 5 - CI/CD - Testing in CI
+### testing-in-ci - Week 5 - CI/CD - Testing in CI
 
 - **Type:** Refresh
 - **Done?:** [ ]
-- **Depends On:** T22
+- **Depends On:** ['github-actions-fundamentals']
 - **Learning / Outcome:** Understand and be able to explain: pytest command, test discovery, failure output, caching dependencies.
 - **Subtopics to Learn:
   - pytest command
@@ -349,11 +362,79 @@ A note existing by itself never marks work complete.
   - artifacts
 - **Project Task:** Run the complete test suite automatically on push/PR.
 
-### T24 - Week 5 - Security - Gitleaks
+### ml-ci-pipeline - Week 10 - CI/CD - ML CI pipeline
+
+- **Type:** Build
+- **Done?:** [ ]
+- **Depends On:** ['deployment-model-loading']
+- **Learning / Outcome:** Understand and be able to explain: checkout, Python setup, dependency install, pytest.
+- **Subtopics to Learn:
+  - checkout
+  - Python setup
+  - dependency install
+  - pytest
+  - quality checks
+- **Project Task:** Create CI pipeline for every pull request.
+
+### container-cd - Week 11 - CI/CD - Container CD
+
+- **Type:** Build
+- **Done?:** [ ]
+- **Depends On:** ['model-evaluation-in-ci']
+- **Learning / Outcome:** Understand and be able to explain: Docker build, image tag, push, commit SHA tags.
+- **Subtopics to Learn:
+  - Docker build
+  - image tag
+  - push
+  - commit SHA tags
+  - latest pitfalls
+- **Project Task:** Automatically build and push images after approved changes.
+
+### environment-separation - Week 11 - CI/CD - Environment separation
+
+- **Type:** Build
+- **Done?:** [ ]
+- **Depends On:** ['container-cd']
+- **Learning / Outcome:** Understand and be able to explain: dev, staging, prod, environment variables.
+- **Subtopics to Learn:
+  - dev
+  - staging
+  - prod
+  - environment variables
+  - approval gates
+- **Project Task:** Create environment-aware deployment configuration.
+
+### rollback-concepts - Week 11 - CI/CD - Rollback concepts
+
+- **Type:** Build
+- **Done?:** [ ]
+- **Depends On:** ['environment-separation']
+- **Learning / Outcome:** Understand and be able to explain: previous image, model version, deployment rollback, database/data caveats.
+- **Subtopics to Learn:
+  - previous image
+  - model version
+  - deployment rollback
+  - database/data caveats
+- **Project Task:** Demonstrate rollback to a previous application/model version.
+
+### ci-gke - Week 16 - CI/CD - CI → GKE
+
+- **Type:** Build
+- **Done?:** [ ]
+- **Depends On:** ['gke-deployment']
+- **Learning / Outcome:** Understand and be able to explain: image push, deployment update, rollout, deployment status.
+- **Subtopics to Learn:
+  - image push
+  - deployment update
+  - rollout
+  - deployment status
+- **Project Task:** Automate deployment from GitHub Actions to GKE.
+
+### gitleaks - Week 5 - Security - Gitleaks
 
 - **Type:** Refresh
 - **Done?:** [ ]
-- **Depends On:** T23
+- **Depends On:** ['testing-in-ci']
 - **Learning / Outcome:** Understand and be able to explain: secret patterns, false positives, pre-commit vs CI, failure handling.
 - **Subtopics to Learn:
   - secret patterns
@@ -362,11 +443,11 @@ A note existing by itself never marks work complete.
   - failure handling
 - **Project Task:** Add secret scanning to CI and test it with a safe dummy secret.
 
-### T25 - Week 5 - Security - OIDC / keyless GCP auth
+### oidc-keyless-gcp-auth - Week 5 - Security - OIDC / keyless GCP auth
 
 - **Type:** Refresh
 - **Done?:** [ ]
-- **Depends On:** T24
+- **Depends On:** ['gitleaks']
 - **Learning / Outcome:** Understand and be able to explain: OIDC concept, GitHub identity token, trust relationship, workload identity federation.
 - **Subtopics to Learn:
   - OIDC concept
@@ -376,24 +457,11 @@ A note existing by itself never marks work complete.
   - short-lived credentials
 - **Project Task:** Rebuild GitHub → GCP authentication without storing a service-account key.
 
-### T26 - Week 5 - GCP - Artifact Registry
+### secret-manager - Week 5 - Security - Secret Manager
 
 - **Type:** Build
 - **Done?:** [ ]
-- **Depends On:** T25
-- **Learning / Outcome:** Understand and be able to explain: repositories, Docker auth, image tags, immutability concepts.
-- **Subtopics to Learn:
-  - repositories
-  - Docker auth
-  - image tags
-  - immutability concepts
-- **Project Task:** Build and push the project image to Artifact Registry.
-
-### T27 - Week 5 - Security - Secret Manager
-
-- **Type:** Build
-- **Done?:** [ ]
-- **Depends On:** T26
+- **Depends On:** ['artifact-registry']
 - **Learning / Outcome:** Understand and be able to explain: secret creation, access permissions, runtime retrieval, rotation concept.
 - **Subtopics to Learn:
   - secret creation
@@ -402,11 +470,24 @@ A note existing by itself never marks work complete.
   - rotation concept
 - **Project Task:** Move runtime secrets/config out of source code.
 
-### T28 - Week 6 - Python - Project structure
+### security-checks - Week 10 - Security - Security checks
+
+- **Type:** Build
+- **Done?:** [ ]
+- **Depends On:** ['ml-ci-pipeline']
+- **Learning / Outcome:** Understand and be able to explain: secret scan, dependency considerations, Docker scan concept, failure policy.
+- **Subtopics to Learn:
+  - secret scan
+  - dependency considerations
+  - Docker scan concept
+  - failure policy
+- **Project Task:** Fail CI when security checks fail.
+
+### project-structure - Week 6 - Python - Project structure
 
 - **Type:** Learn
 - **Done?:** [ ]
-- **Depends On:** T27
+- **Depends On:** ['secret-manager']
 - **Learning / Outcome:** Understand and be able to explain: src layout, modules, packages, pyproject.toml.
 - **Subtopics to Learn:
   - src layout
@@ -417,11 +498,11 @@ A note existing by itself never marks work complete.
   - virtual environments
 - **Project Task:** Refactor the project into a clean installable Python package.
 
-### T29 - Week 6 - Python - Type hints
+### type-hints - Week 6 - Python - Type hints
 
 - **Type:** Learn
 - **Done?:** [ ]
-- **Depends On:** T28
+- **Depends On:** ['project-structure']
 - **Learning / Outcome:** Understand and be able to explain: typing basics, Optional, collections, function annotations.
 - **Subtopics to Learn:
   - typing basics
@@ -431,11 +512,11 @@ A note existing by itself never marks work complete.
   - mypy concept
 - **Project Task:** Add useful type hints to core pipeline functions.
 
-### T30 - Week 6 - Python - Exceptions
+### exceptions - Week 6 - Python - Exceptions
 
 - **Type:** Learn
 - **Done?:** [ ]
-- **Depends On:** T29
+- **Depends On:** ['type-hints']
 - **Learning / Outcome:** Understand and be able to explain: custom exceptions, try/except, exception chaining, fail-fast vs recover.
 - **Subtopics to Learn:
   - custom exceptions
@@ -444,11 +525,11 @@ A note existing by itself never marks work complete.
   - fail-fast vs recover
 - **Project Task:** Define clear errors for data, model, and inference failures.
 
-### T31 - Week 6 - Python - Configuration
+### configuration - Week 6 - Python - Configuration
 
 - **Type:** Build
 - **Done?:** [ ]
-- **Depends On:** T30
+- **Depends On:** ['exceptions']
 - **Learning / Outcome:** Understand and be able to explain: environment-based config, defaults, validation, dev vs prod config.
 - **Subtopics to Learn:
   - environment-based config
@@ -457,11 +538,11 @@ A note existing by itself never marks work complete.
   - dev vs prod config
 - **Project Task:** Create one configuration layer used by training and API code.
 
-### T32 - Week 6 - Testing - pytest
+### pytest - Week 6 - Testing - pytest
 
 - **Type:** Build
 - **Done?:** [ ]
-- **Depends On:** T31
+- **Depends On:** ['configuration']
 - **Learning / Outcome:** Understand and be able to explain: unit tests, fixtures, parametrize, mocking.
 - **Subtopics to Learn:
   - unit tests
@@ -471,11 +552,11 @@ A note existing by itself never marks work complete.
   - test isolation
 - **Project Task:** Write tests for data validation, feature logic, and model utilities.
 
-### T33 - Week 6 - Quality - Logging
+### logging - Week 6 - Quality - Logging
 
 - **Type:** Build
 - **Done?:** [ ]
-- **Depends On:** T32
+- **Depends On:** ['pytest']
 - **Learning / Outcome:** Understand and be able to explain: log levels, structured logs, request IDs, exception logging.
 - **Subtopics to Learn:
   - log levels
@@ -484,11 +565,11 @@ A note existing by itself never marks work complete.
   - exception logging
 - **Project Task:** Add consistent application/pipeline logging.
 
-### T34 - Week 7 - FastAPI - FastAPI fundamentals
+### fastapi-fundamentals - Week 7 - FastAPI - FastAPI fundamentals
 
 - **Type:** Learn
 - **Done?:** [ ]
-- **Depends On:** T33
+- **Depends On:** ['logging']
 - **Learning / Outcome:** Understand and be able to explain: routing, path/query/body parameters, Pydantic models, validation.
 - **Subtopics to Learn:
   - routing
@@ -498,11 +579,11 @@ A note existing by itself never marks work complete.
   - OpenAPI
 - **Project Task:** Build a small standalone FastAPI practice service.
 
-### T35 - Week 7 - FastAPI - Inference endpoints
+### inference-endpoints - Week 7 - FastAPI - Inference endpoints
 
 - **Type:** Build
 - **Done?:** [ ]
-- **Depends On:** T34
+- **Depends On:** ['fastapi-fundamentals']
 - **Learning / Outcome:** Understand and be able to explain: /health, /model-info, /predict, HTTP status codes.
 - **Subtopics to Learn:
   - /health
@@ -512,11 +593,11 @@ A note existing by itself never marks work complete.
   - validation errors
 - **Project Task:** Build the inference API around the registered model.
 
-### T36 - Week 7 - FastAPI - API error handling
+### api-error-handling - Week 7 - FastAPI - API error handling
 
 - **Type:** Build
 - **Done?:** [ ]
-- **Depends On:** T35
+- **Depends On:** ['inference-endpoints']
 - **Learning / Outcome:** Understand and be able to explain: input validation, model-not-loaded failure, internal errors, safe error messages.
 - **Subtopics to Learn:
   - input validation
@@ -525,11 +606,11 @@ A note existing by itself never marks work complete.
   - safe error messages
 - **Project Task:** Add robust API error handling and tests.
 
-### T37 - Week 7 - Docker - Docker fundamentals
+### docker-fundamentals - Week 7 - Docker - Docker fundamentals
 
 - **Type:** Learn
 - **Done?:** [ ]
-- **Depends On:** T36
+- **Depends On:** ['api-error-handling']
 - **Learning / Outcome:** Understand and be able to explain: image vs container, Dockerfile, layers, build context.
 - **Subtopics to Learn:
   - image vs container
@@ -539,11 +620,11 @@ A note existing by itself never marks work complete.
   - ports
 - **Project Task:** Containerize the FastAPI service.
 
-### T38 - Week 7 - Docker - Docker storage & networking
+### docker-storage-networking - Week 7 - Docker - Docker storage & networking
 
 - **Type:** Learn
 - **Done?:** [ ]
-- **Depends On:** T37
+- **Depends On:** ['docker-fundamentals']
 - **Learning / Outcome:** Understand and be able to explain: volumes, bind mounts, container networking, environment variables.
 - **Subtopics to Learn:
   - volumes
@@ -552,11 +633,11 @@ A note existing by itself never marks work complete.
   - environment variables
 - **Project Task:** Run API + supporting service locally with Docker.
 
-### T39 - Week 7 - Docker - Production Docker
+### production-docker - Week 7 - Docker - Production Docker
 
 - **Type:** Build
 - **Done?:** [ ]
-- **Depends On:** T38
+- **Depends On:** ['docker-storage-networking']
 - **Learning / Outcome:** Understand and be able to explain: multi-stage builds, non-root user, small base image, healthcheck.
 - **Subtopics to Learn:
   - multi-stage builds
@@ -566,11 +647,11 @@ A note existing by itself never marks work complete.
   - .dockerignore
 - **Project Task:** Harden the inference image.
 
-### T40 - Week 8 - MLflow - Tracking fundamentals
+### tracking-fundamentals - Week 8 - MLflow - Tracking fundamentals
 
 - **Type:** Learn
 - **Done?:** [ ]
-- **Depends On:** T39
+- **Depends On:** ['production-docker']
 - **Learning / Outcome:** Understand and be able to explain: experiment, run, params, metrics.
 - **Subtopics to Learn:
   - experiment
@@ -581,11 +662,11 @@ A note existing by itself never marks work complete.
   - tags
 - **Project Task:** Track baseline model training in MLflow.
 
-### T41 - Week 8 - MLflow - Reproducibility metadata
+### reproducibility-metadata - Week 8 - MLflow - Reproducibility metadata
 
 - **Type:** Build
 - **Done?:** [ ]
-- **Depends On:** T40
+- **Depends On:** ['tracking-fundamentals']
 - **Learning / Outcome:** Understand and be able to explain: git commit, dataset version, timestamp, model parameters.
 - **Subtopics to Learn:
   - git commit
@@ -595,11 +676,11 @@ A note existing by itself never marks work complete.
   - evaluation metrics
 - **Project Task:** Log complete training metadata for every run.
 
-### T42 - Week 8 - MLflow - Artifacts
+### artifacts - Week 8 - MLflow - Artifacts
 
 - **Type:** Build
 - **Done?:** [ ]
-- **Depends On:** T41
+- **Depends On:** ['reproducibility-metadata']
 - **Learning / Outcome:** Understand and be able to explain: model artifact, plots, feature metadata, evaluation report.
 - **Subtopics to Learn:
   - model artifact
@@ -608,11 +689,11 @@ A note existing by itself never marks work complete.
   - evaluation report
 - **Project Task:** Store model/evaluation artifacts with each run.
 
-### T43 - Week 9 - MLflow - Model Registry
+### model-registry - Week 9 - MLflow - Model Registry
 
 - **Type:** Learn
 - **Done?:** [ ]
-- **Depends On:** T42
+- **Depends On:** ['artifacts']
 - **Learning / Outcome:** Understand and be able to explain: registered model, version, alias, stage concept.
 - **Subtopics to Learn:
   - registered model
@@ -622,11 +703,11 @@ A note existing by itself never marks work complete.
   - promotion
 - **Project Task:** Register trained models.
 
-### T44 - Week 9 - MLflow - Evaluation gate
+### evaluation-gate - Week 9 - MLflow - Evaluation gate
 
 - **Type:** Build
 - **Done?:** [ ]
-- **Depends On:** T43
+- **Depends On:** ['model-registry']
 - **Learning / Outcome:** Understand and be able to explain: validation metric, threshold, comparison, candidate selection.
 - **Subtopics to Learn:
   - validation metric
@@ -635,11 +716,11 @@ A note existing by itself never marks work complete.
   - candidate selection
 - **Project Task:** Allow promotion only when evaluation criteria pass.
 
-### T45 - Week 9 - MLflow - Deployment model loading
+### deployment-model-loading - Week 9 - MLflow - Deployment model loading
 
 - **Type:** Build
 - **Done?:** [ ]
-- **Depends On:** T44
+- **Depends On:** ['evaluation-gate']
 - **Learning / Outcome:** Understand and be able to explain: registry URI, model alias, startup loading, version reporting.
 - **Subtopics to Learn:
   - registry URI
@@ -648,38 +729,11 @@ A note existing by itself never marks work complete.
   - version reporting
 - **Project Task:** Make the API load a controlled model version and expose its version.
 
-### T46 - Week 10 - CI/CD - ML CI pipeline
+### model-evaluation-in-ci - Week 10 - ML - Model evaluation in CI
 
 - **Type:** Build
 - **Done?:** [ ]
-- **Depends On:** T45
-- **Learning / Outcome:** Understand and be able to explain: checkout, Python setup, dependency install, pytest.
-- **Subtopics to Learn:
-  - checkout
-  - Python setup
-  - dependency install
-  - pytest
-  - quality checks
-- **Project Task:** Create CI pipeline for every pull request.
-
-### T47 - Week 10 - Security - Security checks
-
-- **Type:** Build
-- **Done?:** [ ]
-- **Depends On:** T46
-- **Learning / Outcome:** Understand and be able to explain: secret scan, dependency considerations, Docker scan concept, failure policy.
-- **Subtopics to Learn:
-  - secret scan
-  - dependency considerations
-  - Docker scan concept
-  - failure policy
-- **Project Task:** Fail CI when security checks fail.
-
-### T48 - Week 10 - ML - Model evaluation in CI
-
-- **Type:** Build
-- **Done?:** [ ]
-- **Depends On:** T47
+- **Depends On:** ['security-checks']
 - **Learning / Outcome:** Understand and be able to explain: test dataset, metric threshold, artifact output, failure message.
 - **Subtopics to Learn:
   - test dataset
@@ -688,52 +742,11 @@ A note existing by itself never marks work complete.
   - failure message
 - **Project Task:** Run a lightweight model evaluation gate in CI.
 
-### T49 - Week 11 - CI/CD - Container CD
-
-- **Type:** Build
-- **Done?:** [ ]
-- **Depends On:** T48
-- **Learning / Outcome:** Understand and be able to explain: Docker build, image tag, push, commit SHA tags.
-- **Subtopics to Learn:
-  - Docker build
-  - image tag
-  - push
-  - commit SHA tags
-  - latest pitfalls
-- **Project Task:** Automatically build and push images after approved changes.
-
-### T50 - Week 11 - CI/CD - Environment separation
-
-- **Type:** Build
-- **Done?:** [ ]
-- **Depends On:** T49
-- **Learning / Outcome:** Understand and be able to explain: dev, staging, prod, environment variables.
-- **Subtopics to Learn:
-  - dev
-  - staging
-  - prod
-  - environment variables
-  - approval gates
-- **Project Task:** Create environment-aware deployment configuration.
-
-### T51 - Week 11 - CI/CD - Rollback concepts
-
-- **Type:** Build
-- **Done?:** [ ]
-- **Depends On:** T50
-- **Learning / Outcome:** Understand and be able to explain: previous image, model version, deployment rollback, database/data caveats.
-- **Subtopics to Learn:
-  - previous image
-  - model version
-  - deployment rollback
-  - database/data caveats
-- **Project Task:** Demonstrate rollback to a previous application/model version.
-
-### T52 - Week 12 - Terraform - Terraform core
+### terraform-core - Week 12 - Terraform - Terraform core
 
 - **Type:** Learn
 - **Done?:** [ ]
-- **Depends On:** T51
+- **Depends On:** ['rollback-concepts']
 - **Learning / Outcome:** Understand and be able to explain: provider, resource, variable, output.
 - **Subtopics to Learn:
   - provider
@@ -743,11 +756,11 @@ A note existing by itself never marks work complete.
   - data source
 - **Project Task:** Provision one GCP resource with Terraform.
 
-### T53 - Week 12 - Terraform - Terraform state
+### terraform-state - Week 12 - Terraform - Terraform state
 
 - **Type:** Learn
 - **Done?:** [ ]
-- **Depends On:** T52
+- **Depends On:** ['terraform-core']
 - **Learning / Outcome:** Understand and be able to explain: state purpose, plan, apply, destroy.
 - **Subtopics to Learn:
   - state purpose
@@ -757,11 +770,11 @@ A note existing by itself never marks work complete.
   - state drift
 - **Project Task:** Create and inspect project state.
 
-### T54 - Week 12 - Terraform - Terraform structure
+### terraform-structure - Week 12 - Terraform - Terraform structure
 
 - **Type:** Build
 - **Done?:** [ ]
-- **Depends On:** T53
+- **Depends On:** ['terraform-state']
 - **Learning / Outcome:** Understand and be able to explain: main.tf, variables.tf, outputs.tf, terraform.tfvars.
 - **Subtopics to Learn:
   - main.tf
@@ -771,11 +784,11 @@ A note existing by itself never marks work complete.
   - format/validate
 - **Project Task:** Create a clean terraform/ directory.
 
-### T55 - Week 13 - Terraform - GCP infrastructure
+### gcp-infrastructure - Week 13 - Terraform - GCP infrastructure
 
 - **Type:** Build
 - **Done?:** [ ]
-- **Depends On:** T54
+- **Depends On:** ['terraform-structure']
 - **Learning / Outcome:** Understand and be able to explain: Artifact Registry, GCS, service accounts, IAM bindings.
 - **Subtopics to Learn:
   - Artifact Registry
@@ -784,11 +797,11 @@ A note existing by itself never marks work complete.
   - IAM bindings
 - **Project Task:** Provision the core project infrastructure with Terraform.
 
-### T56 - Week 13 - Terraform - Modules
+### modules - Week 13 - Terraform - Modules
 
 - **Type:** Learn
 - **Done?:** [ ]
-- **Depends On:** T55
+- **Depends On:** ['gcp-infrastructure']
 - **Learning / Outcome:** Understand and be able to explain: module inputs, outputs, reusability, when not to modularize.
 - **Subtopics to Learn:
   - module inputs
@@ -797,11 +810,11 @@ A note existing by itself never marks work complete.
   - when not to modularize
 - **Project Task:** Extract one reusable infrastructure component.
 
-### T57 - Week 13 - Terraform - Remote state
+### remote-state - Week 13 - Terraform - Remote state
 
 - **Type:** Learn
 - **Done?:** [ ]
-- **Depends On:** T56
+- **Depends On:** ['modules']
 - **Learning / Outcome:** Understand and be able to explain: remote backend, state protection, team workflow, separation.
 - **Subtopics to Learn:
   - remote backend
@@ -810,11 +823,11 @@ A note existing by itself never marks work complete.
   - separation
 - **Project Task:** Document and configure safe state handling for the project.
 
-### T58 - Week 14 - Kubernetes - Core objects
+### core-objects - Week 14 - Kubernetes - Core objects
 
 - **Type:** Learn
 - **Done?:** [ ]
-- **Depends On:** T57
+- **Depends On:** ['remote-state']
 - **Learning / Outcome:** Understand and be able to explain: cluster, node, pod, deployment.
 - **Subtopics to Learn:
   - cluster
@@ -825,11 +838,11 @@ A note existing by itself never marks work complete.
   - namespace
 - **Project Task:** Deploy the FastAPI service locally.
 
-### T59 - Week 14 - Kubernetes - Configuration
+### configuration-2 - Week 14 - Kubernetes - Configuration
 
 - **Type:** Learn
 - **Done?:** [ ]
-- **Depends On:** T58
+- **Depends On:** ['core-objects']
 - **Learning / Outcome:** Understand and be able to explain: ConfigMap, Secret, environment injection, mounted config.
 - **Subtopics to Learn:
   - ConfigMap
@@ -838,11 +851,11 @@ A note existing by itself never marks work complete.
   - mounted config
 - **Project Task:** Move non-secret and secret configuration into K8s resources.
 
-### T60 - Week 14 - Kubernetes - Deployment manifests
+### deployment-manifests - Week 14 - Kubernetes - Deployment manifests
 
 - **Type:** Build
 - **Done?:** [ ]
-- **Depends On:** T59
+- **Depends On:** ['configuration-2']
 - **Learning / Outcome:** Understand and be able to explain: replicas, image, ports, labels.
 - **Subtopics to Learn:
   - replicas
@@ -852,11 +865,11 @@ A note existing by itself never marks work complete.
   - selectors
 - **Project Task:** Create deployment + service manifests.
 
-### T61 - Week 15 - Kubernetes - Health probes
+### health-probes - Week 15 - Kubernetes - Health probes
 
 - **Type:** Learn
 - **Done?:** [ ]
-- **Depends On:** T60
+- **Depends On:** ['deployment-manifests']
 - **Learning / Outcome:** Understand and be able to explain: liveness, readiness, startup probe, failure behavior.
 - **Subtopics to Learn:
   - liveness
@@ -865,11 +878,11 @@ A note existing by itself never marks work complete.
   - failure behavior
 - **Project Task:** Add probes to the API deployment.
 
-### T62 - Week 15 - Kubernetes - Resources
+### resources - Week 15 - Kubernetes - Resources
 
 - **Type:** Learn
 - **Done?:** [ ]
-- **Depends On:** T61
+- **Depends On:** ['health-probes']
 - **Learning / Outcome:** Understand and be able to explain: CPU requests, memory requests, limits, scheduling.
 - **Subtopics to Learn:
   - CPU requests
@@ -878,11 +891,11 @@ A note existing by itself never marks work complete.
   - scheduling
 - **Project Task:** Add realistic resource requests/limits.
 
-### T63 - Week 15 - Kubernetes - Scaling
+### scaling - Week 15 - Kubernetes - Scaling
 
 - **Type:** Learn
 - **Done?:** [ ]
-- **Depends On:** T62
+- **Depends On:** ['resources']
 - **Learning / Outcome:** Understand and be able to explain: HPA, CPU metrics, replica scaling, stability.
 - **Subtopics to Learn:
   - HPA
@@ -891,11 +904,11 @@ A note existing by itself never marks work complete.
   - stability
 - **Project Task:** Configure horizontal scaling.
 
-### T64 - Week 15 - Kubernetes - Debugging
+### debugging - Week 15 - Kubernetes - Debugging
 
 - **Type:** Build
 - **Done?:** [ ]
-- **Depends On:** T63
+- **Depends On:** ['scaling']
 - **Learning / Outcome:** Understand and be able to explain: kubectl logs, describe, events, rollout status.
 - **Subtopics to Learn:
   - kubectl logs
@@ -905,37 +918,11 @@ A note existing by itself never marks work complete.
   - exec
 - **Project Task:** Delete/break a pod intentionally and recover it.
 
-### T65 - Week 16 - GKE - GKE deployment
-
-- **Type:** Build
-- **Done?:** [ ]
-- **Depends On:** T64
-- **Learning / Outcome:** Understand and be able to explain: cluster creation, node pool, Artifact Registry integration, kubectl context.
-- **Subtopics to Learn:
-  - cluster creation
-  - node pool
-  - Artifact Registry integration
-  - kubectl context
-- **Project Task:** Deploy the inference service to GKE.
-
-### T66 - Week 16 - CI/CD - CI → GKE
-
-- **Type:** Build
-- **Done?:** [ ]
-- **Depends On:** T65
-- **Learning / Outcome:** Understand and be able to explain: image push, deployment update, rollout, deployment status.
-- **Subtopics to Learn:
-  - image push
-  - deployment update
-  - rollout
-  - deployment status
-- **Project Task:** Automate deployment from GitHub Actions to GKE.
-
-### T67 - Week 16 - Kubernetes - Ingress / external access
+### ingress-external-access - Week 16 - Kubernetes - Ingress / external access
 
 - **Type:** Learn
 - **Done?:** [ ]
-- **Depends On:** T66
+- **Depends On:** ['ci-gke']
 - **Learning / Outcome:** Understand and be able to explain: ingress concept, TLS concept, service exposure, health checks.
 - **Subtopics to Learn:
   - ingress concept
@@ -944,11 +931,24 @@ A note existing by itself never marks work complete.
   - health checks
 - **Project Task:** Expose the API safely for the demo environment.
 
-### T68 - Week 17 - Airflow - DAG fundamentals
+### gke-deployment - Week 16 - GKE - GKE deployment
+
+- **Type:** Build
+- **Done?:** [ ]
+- **Depends On:** ['debugging']
+- **Learning / Outcome:** Understand and be able to explain: cluster creation, node pool, Artifact Registry integration, kubectl context.
+- **Subtopics to Learn:
+  - cluster creation
+  - node pool
+  - Artifact Registry integration
+  - kubectl context
+- **Project Task:** Deploy the inference service to GKE.
+
+### dag-fundamentals - Week 17 - Airflow - DAG fundamentals
 
 - **Type:** Learn
 - **Done?:** [ ]
-- **Depends On:** T67
+- **Depends On:** ['ingress-external-access']
 - **Learning / Outcome:** Understand and be able to explain: DAG, task, dependency, schedule.
 - **Subtopics to Learn:
   - DAG
@@ -959,11 +959,11 @@ A note existing by itself never marks work complete.
   - backfill
 - **Project Task:** Build a small local DAG.
 
-### T69 - Week 17 - Airflow - Reliability
+### reliability - Week 17 - Airflow - Reliability
 
 - **Type:** Learn
 - **Done?:** [ ]
-- **Depends On:** T68
+- **Depends On:** ['dag-fundamentals']
 - **Learning / Outcome:** Understand and be able to explain: retries, retry delay, timeouts, failure callbacks.
 - **Subtopics to Learn:
   - retries
@@ -973,11 +973,11 @@ A note existing by itself never marks work complete.
   - idempotency
 - **Project Task:** Make pipeline tasks safe to retry.
 
-### T70 - Week 17 - Airflow - ML training DAG
+### ml-training-dag - Week 17 - Airflow - ML training DAG
 
 - **Type:** Build
 - **Done?:** [ ]
-- **Depends On:** T69
+- **Depends On:** ['reliability']
 - **Learning / Outcome:** Understand and be able to explain: data validation, feature engineering, training, MLflow logging.
 - **Subtopics to Learn:
   - data validation
@@ -987,11 +987,11 @@ A note existing by itself never marks work complete.
   - evaluation
 - **Project Task:** Orchestrate the end-to-end training pipeline.
 
-### T71 - Week 18 - Monitoring - Prometheus
+### prometheus - Week 18 - Monitoring - Prometheus
 
 - **Type:** Learn
 - **Done?:** [ ]
-- **Depends On:** T70
+- **Depends On:** ['ml-training-dag']
 - **Learning / Outcome:** Understand and be able to explain: metrics endpoint, counter, gauge, histogram.
 - **Subtopics to Learn:
   - metrics endpoint
@@ -1001,11 +1001,11 @@ A note existing by itself never marks work complete.
   - labels
 - **Project Task:** Instrument FastAPI with useful metrics.
 
-### T72 - Week 18 - Monitoring - Application metrics
+### application-metrics - Week 18 - Monitoring - Application metrics
 
 - **Type:** Build
 - **Done?:** [ ]
-- **Depends On:** T71
+- **Depends On:** ['prometheus']
 - **Learning / Outcome:** Understand and be able to explain: requests/sec, p95 latency, 5xx rate, prediction count.
 - **Subtopics to Learn:
   - requests/sec
@@ -1015,11 +1015,11 @@ A note existing by itself never marks work complete.
   - model version
 - **Project Task:** Expose the core inference metrics.
 
-### T73 - Week 18 - Monitoring - Grafana
+### grafana - Week 18 - Monitoring - Grafana
 
 - **Type:** Build
 - **Done?:** [ ]
-- **Depends On:** T72
+- **Depends On:** ['application-metrics']
 - **Learning / Outcome:** Understand and be able to explain: data source, panels, queries, dashboard layout.
 - **Subtopics to Learn:
   - data source
@@ -1028,11 +1028,11 @@ A note existing by itself never marks work complete.
   - dashboard layout
 - **Project Task:** Create an inference-service dashboard.
 
-### T74 - Week 19 - ML Monitoring - Data drift
+### data-drift - Week 19 - ML Monitoring - Data drift
 
 - **Type:** Learn
 - **Done?:** [ ]
-- **Depends On:** T73
+- **Depends On:** ['grafana']
 - **Learning / Outcome:** Understand and be able to explain: feature distributions, baseline window, current window, thresholds.
 - **Subtopics to Learn:
   - feature distributions
@@ -1042,11 +1042,11 @@ A note existing by itself never marks work complete.
   - false alarms
 - **Project Task:** Create a drift simulation using synthetic data.
 
-### T75 - Week 19 - ML Monitoring - Prediction drift
+### prediction-drift - Week 19 - ML Monitoring - Prediction drift
 
 - **Type:** Learn
 - **Done?:** [ ]
-- **Depends On:** T74
+- **Depends On:** ['data-drift']
 - **Learning / Outcome:** Understand and be able to explain: prediction distribution, class/score changes, monitoring window.
 - **Subtopics to Learn:
   - prediction distribution
@@ -1054,11 +1054,11 @@ A note existing by itself never marks work complete.
   - monitoring window
 - **Project Task:** Monitor prediction distribution changes.
 
-### T76 - Week 19 - ML Monitoring - Retraining trigger
+### retraining-trigger - Week 19 - ML Monitoring - Retraining trigger
 
 - **Type:** Build
 - **Done?:** [ ]
-- **Depends On:** T75
+- **Depends On:** ['prediction-drift']
 - **Learning / Outcome:** Understand and be able to explain: drift alert, quality gate, Airflow trigger, cooldown concept.
 - **Subtopics to Learn:
   - drift alert
@@ -1067,11 +1067,11 @@ A note existing by itself never marks work complete.
   - cooldown concept
 - **Project Task:** Connect drift detection to retraining.
 
-### T77 - Week 19 - ML Monitoring - Retraining workflow
+### retraining-workflow - Week 19 - ML Monitoring - Retraining workflow
 
 - **Type:** Build
 - **Done?:** [ ]
-- **Depends On:** T76
+- **Depends On:** ['retraining-trigger']
 - **Learning / Outcome:** Understand and be able to explain: retrain, evaluate, register, deploy.
 - **Subtopics to Learn:
   - retrain
@@ -1081,11 +1081,11 @@ A note existing by itself never marks work complete.
   - rollback
 - **Project Task:** Implement alert → retrain → evaluate → register → deploy.
 
-### T78 - Week 20 - Hardening - Failure scenarios
+### failure-scenarios - Week 20 - Hardening - Failure scenarios
 
 - **Type:** Build
 - **Done?:** [ ]
-- **Depends On:** T77
+- **Depends On:** ['retraining-workflow']
 - **Learning / Outcome:** Understand and be able to explain: bad image, bad model, secret failure, pod crash.
 - **Subtopics to Learn:
   - bad image
@@ -1095,11 +1095,11 @@ A note existing by itself never marks work complete.
   - drift alert
 - **Project Task:** Run at least five failure drills and document recovery.
 
-### T79 - Week 20 - Hardening - Security review
+### security-review - Week 20 - Hardening - Security review
 
 - **Type:** Build
 - **Done?:** [ ]
-- **Depends On:** T78
+- **Depends On:** ['failure-scenarios']
 - **Learning / Outcome:** Understand and be able to explain: secrets, IAM, network exposure, container user.
 - **Subtopics to Learn:
   - secrets
@@ -1109,11 +1109,11 @@ A note existing by itself never marks work complete.
   - CI credentials
 - **Project Task:** Review the project against a production security checklist.
 
-### T80 - Week 20 - Portfolio - Architecture documentation
+### architecture-documentation - Week 20 - Portfolio - Architecture documentation
 
 - **Type:** Build
 - **Done?:** [ ]
-- **Depends On:** T79
+- **Depends On:** ['security-review']
 - **Learning / Outcome:** Understand and be able to explain: system diagram, data flow, deployment flow, monitoring flow.
 - **Subtopics to Learn:
   - system diagram
@@ -1122,11 +1122,11 @@ A note existing by itself never marks work complete.
   - monitoring flow
 - **Project Task:** Create final architecture diagram and README.
 
-### T81 - Week 20 - Portfolio - Interview readiness
+### interview-readiness - Week 20 - Portfolio - Interview readiness
 
 - **Type:** Build
 - **Done?:** [ ]
-- **Depends On:** T80
+- **Depends On:** ['architecture-documentation']
 - **Learning / Outcome:** Understand and be able to explain: why each tool, trade-offs, failure modes, debugging path.
 - **Subtopics to Learn:
   - why each tool
