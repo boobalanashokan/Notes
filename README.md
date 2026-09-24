@@ -20,6 +20,12 @@ Next: Filesystem & shell
 
   - [Linux](Foundations/linux.md)
   - [Networking](Foundations/Networking.md)
+## Inbox
+
+### Mlops
+
+#### 2026 09 24
+
 <!-- INDEX:END -->
 
 <!-- DETAILED-DASHBOARD:START -->
