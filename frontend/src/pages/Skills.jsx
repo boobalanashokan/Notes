@@ -57,23 +57,30 @@ function Skills() {
 
   return (
     <div className="page-shell">
-      <div className="card">
-        <h2>Skills</h2>
+      <div className="card page-header-card">
+        <div className="page-heading">
+          <div>
+            <span className="page-kicker">Progress</span>
+            <h2>Skills</h2>
+          </div>
+          <div className="page-header-metrics">
+            <span className="page-metric-pill">{sortedAreas.length} focus areas</span>
+          </div>
+        </div>
+        <p className="page-subtitle">Track how each learning area is progressing and focus on the domains that still need the most attention.</p>
       </div>
 
-      <div className="area-stack">
+      <div className="skills-grid">
         {sortedAreas.map((area) => (
-          <div key={area.area_name} className="card area-section">
-            <div className="area-header-row">
-              <span>{area.area_name}</span>
-              <span>{area.percent_complete}%</span>
+          <div key={area.area_name} className="card small-card skill-card">
+            <div className="skill-card-header">
+              <h3>{area.area_name}</h3>
+              <div className="status-badge done">{area.percent_complete}%</div>
             </div>
             <div className="progress-bar" aria-label={`${area.area_name} progress`}>
               <div className="progress-fill" style={{ width: `${area.percent_complete}%` }} />
             </div>
-            <p className="topic-meta">
-              {area.completed_topics} / {area.total_topics} complete
-            </p>
+            <p className="stat-label">{area.completed_topics} / {area.total_topics} complete</p>
           </div>
         ))}
       </div>

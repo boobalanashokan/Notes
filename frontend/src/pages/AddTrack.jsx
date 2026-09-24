@@ -131,8 +131,17 @@ function AddTrack() {
 
   return (
     <div className="page-shell track-json-page">
-      <div className="card">
-        <h2>Add Track</h2>
+      <div className="card page-header-card">
+        <div className="page-heading">
+          <div>
+            <span className="page-kicker">Create</span>
+            <h2>Add Track</h2>
+          </div>
+          <div className="page-header-metrics">
+            <span className="page-metric-pill">JSON workflow</span>
+          </div>
+        </div>
+        <p className="page-subtitle">Add a new study track by validating the curriculum JSON before creating it in the app.</p>
       </div>
 
       <div className="card">

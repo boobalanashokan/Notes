@@ -360,9 +360,20 @@ function UploadNotes() {
 
   return (
     <div className="page-shell">
-      <div className="card">
-        <h2>Upload Notes</h2>
+      <div className="card page-header-card">
+        <div className="page-heading">
+          <div>
+            <span className="page-kicker">Import</span>
+            <h2>Upload Notes</h2>
+          </div>
+          <div className="page-header-metrics">
+            <span className="page-metric-pill">{selectedFiles.length} selected</span>
+          </div>
+        </div>
+        <p className="page-subtitle">Add study notes, map them to the right topic, and approve them into your learning track.</p>
+      </div>
 
+      <div className="card">
         <div
           className={`upload-dropzone ${dragActive ? 'drag-active' : ''}`}
           onDragOver={onDragOver}

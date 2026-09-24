@@ -83,10 +83,10 @@ function Roadmap() {
   }
 
   return (
-    <div className="page-shell">
+    <div className="page-shell roadmap-page">
       <div className="card filter-card">
         <div className="filter-row">
-          <label>
+          <label className="filter-field">
             <span>Area</span>
             <select value={selectedArea} onChange={(e) => setSelectedArea(e.target.value)}>
               {areaOptions.map((area) => (
@@ -95,7 +95,7 @@ function Roadmap() {
             </select>
           </label>
 
-          <label>
+          <label className="filter-field">
             <span>Status</span>
             <select value={selectedStatus} onChange={(e) => setSelectedStatus(e.target.value)}>
               <option value="All">All</option>
@@ -124,8 +124,14 @@ function Roadmap() {
                 className="section-toggle"
                 onClick={() => toggleArea(area.id)}
               >
-                <span>{area.name}</span>
-                <span>{isExpanded ? '−' : '+'}</span>
+                <span className="section-title">
+                  <span className="section-icon">{area.name === 'Linux' ? '◧' : area.name === 'Networking' ? '◌' : area.name === 'Git' ? '✦' : '◫'}</span>
+                  {area.name}
+                </span>
+                <span className="section-right">
+                  <span className="area-progress">{area.topics.filter((topic) => topic.done).length} / {area.topics.length}</span>
+                  <span className="toggle-indicator">{isExpanded ? '⌃' : '⌄'}</span>
+                </span>
               </button>
 
               {isExpanded && (
@@ -133,7 +139,10 @@ function Roadmap() {
                   {visibleTopics.map((topic) => (
                     <div key={topic.id} className="topic-card">
                       <div className="topic-header-row">
-                        <h4>{topic.name}</h4>
+                        <div className="topic-header-main">
+                          <span className="topic-icon">✦</span>
+                          <h4>{topic.name}</h4>
+                        </div>
                         <div className={`status-badge ${topic.done ? 'done' : 'not-done'}`}>
                           {topic.done ? '✓ Done' : '○ Not done'}
                         </div>
@@ -143,18 +152,23 @@ function Roadmap() {
                         <span>Week {topic.week}</span>
                       </div>
 
-                      <ul className="subtopic-list">
-                        {topic.subtopics.map((subtopic) => (
-                          <li key={subtopic}>{subtopic}</li>
-                        ))}
-                      </ul>
+                      <div className="topic-body-grid">
+                        <div className="topic-body-panel">
+                          <h5>Subtopics</h5>
+                          <ul className="subtopic-list">
+                            {topic.subtopics.map((subtopic) => (
+                              <li key={subtopic}>{subtopic}</li>
+                            ))}
+                          </ul>
+                        </div>
 
-                      <div className="detail-block">
-                        <strong>Learning outcome:</strong>
-                        <p>{topic.learning_outcome}</p>
+                        <div className="topic-body-panel">
+                          <h5>Learning outcome</h5>
+                          <p>{topic.learning_outcome}</p>
+                        </div>
                       </div>
 
-                      <div className="detail-block">
+                      <div className="detail-block project-block">
                         <strong>Project task:</strong>
                         <p>{topic.project_task}</p>
                       </div>

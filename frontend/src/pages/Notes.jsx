@@ -59,9 +59,19 @@ function Notes() {
   }
 
   return (
-    <div className="page-shell">
-      <div className="card">
-        <h2>Notes</h2>
+    <div className="page-shell notes-page">
+      <div className="card page-header-card">
+        <div className="page-heading">
+          <div>
+            <span className="page-kicker">Knowledge</span>
+            <h2>Notes</h2>
+          </div>
+          <div className="page-header-metrics">
+            <span className="page-metric-pill">{track?.areas?.length || 0} areas</span>
+            <span className="page-metric-pill">{track?.areas?.reduce((count, area) => count + (area.topics?.length || 0), 0) || 0} topics</span>
+          </div>
+        </div>
+        <p className="page-subtitle">Review the concepts, outcomes, and action items behind each topic in this track.</p>
       </div>
 
       <div className="area-stack">

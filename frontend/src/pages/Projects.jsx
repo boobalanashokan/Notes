@@ -75,9 +75,22 @@ function Projects() {
 
   return (
     <div className="page-shell">
+      <div className="card page-header-card">
+        <div className="page-heading">
+          <div>
+            <span className="page-kicker">Build</span>
+            <h2>Projects</h2>
+          </div>
+          <div className="page-header-metrics">
+            <span className="page-metric-pill">{projects.length} active tasks</span>
+          </div>
+        </div>
+        <p className="page-subtitle">Turn every lesson into something practical with the project tasks linked to your current track.</p>
+      </div>
+
       <div className="card filter-card">
         <div className="filter-row">
-          <label>
+          <label className="filter-field">
             <span>Status</span>
             <select value={filter} onChange={(event) => setFilter(event.target.value)}>
               <option value="All">All</option>
@@ -88,7 +101,7 @@ function Projects() {
         </div>
       </div>
 
-      <div className="stats-grid">
+      <div className="projects-grid">
         {projects.map((project) => (
           <div key={project.id} className="card small-card">
             <div className="topic-header-row">
