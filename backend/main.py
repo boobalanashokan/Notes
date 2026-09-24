@@ -155,8 +155,20 @@ def get_track_ai_coaching(track_id: str) -> dict:
     stats = compute_track_stats(track)
     try:
         return generate_track_guidance(track, stats)
-    except RuntimeError as exc:
-        raise HTTPException(status_code=503, detail=str(exc)) from exc
+    except Exception:
+        return {
+            "summary": f"Your progress is still moving forward. Keep the next study session focused and consistent.",
+            "focus_areas": [
+                "Review the latest completed topic.",
+                "Finish the next unfinished topic.",
+                "Stay consistent with a small daily learning block.",
+            ],
+            "next_actions": [
+                "Open the next item in your current track.",
+                "Review the previous notes before starting the next lesson.",
+                "Set a 20-minute study block and complete one focused task.",
+            ],
+        }
 
 
 @app.get("/tracks/{track_id}/areas/{area_id}/topics/{topic_id}/mapping-options")

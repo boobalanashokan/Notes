@@ -132,9 +132,39 @@ def _call_gemini(prompt: str) -> dict[str, Any]:
     return parsed
 
 
+def _fallback_guidance(track: Any, stats: dict[str, Any]) -> dict[str, Any]:
+    completed = stats.get("completed_topics", 0)
+    remaining = stats.get("remaining_topics", 0)
+    progress = stats.get("percent_complete", 0)
+    track_name = getattr(track, "name", "your track")
+
+    summary = (
+        f"You are {progress}% through {track_name}. "
+        f"Keep the momentum going with a short, focused study block."
+    )
+    focus_areas = [
+        "Review the most recent completed topic before moving on.",
+        "Complete the next unfinished topic in your current queue.",
+        "Keep daily progress consistent, even for a short study session.",
+    ]
+    next_actions = [
+        f"Finish the next {remaining or 'remaining'} topic in {track_name}.",
+        "Revisit yesterday's notes and summarize the key takeaway.",
+        f"Aim for one focused session to move from {completed} completed topics to a stronger finish.",
+    ]
+    return {
+        "summary": summary,
+        "focus_areas": focus_areas,
+        "next_actions": next_actions,
+    }
+
+
 def generate_track_guidance(track: Any, stats: dict[str, Any]) -> dict[str, Any]:
-    prompt = _build_prompt(track, stats)
-    result = _call_gemini(prompt)
+    try:
+        prompt = _build_prompt(track, stats)
+        result = _call_gemini(prompt)
+    except Exception:
+        return _fallback_guidance(track, stats)
 
     summary = str(result.get("summary") or "You are on the right track. Keep building momentum with the next topic in your queue.")
     focus_areas = result.get("focus_areas") or []
