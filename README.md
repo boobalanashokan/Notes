@@ -42,6 +42,9 @@ Next: Filesystem & shell
 #### Docker
 
       - [Docker Fundamentals](Notes/mlops/docker/docker-fundamentals.md)
+#### Portfolio
+
+      - [Interview Readiness](Notes/mlops/portfolio/interview-readiness.md)
 <!-- INDEX:END -->
 
 <!-- DETAILED-DASHBOARD:START -->
