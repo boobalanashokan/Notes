@@ -36,6 +36,10 @@ export async function getTrack(trackId) {
   return requestJson(`${API_BASE}/tracks/${trackId}`)
 }
 
+export async function getAiCoach(trackId) {
+  return requestJson(`${API_BASE}/tracks/${trackId}/ai/coaching`)
+}
+
 export async function uploadFiles(trackId, files) {
   const formData = new FormData()
   files.forEach((file) => {

@@ -12,6 +12,7 @@ from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import JSONResponse
 from pydantic import ValidationError
 
+from ai_service import generate_track_guidance
 from github_client import GitHubRepoClient
 from models import Track
 from notes_service import (
@@ -143,6 +144,19 @@ def get_track_stats(track_id: str) -> dict:
     if track is None:
         raise HTTPException(status_code=404, detail=f"Track '{track_id}' not found")
     return compute_track_stats(track)
+
+
+@app.get("/tracks/{track_id}/ai/coaching")
+def get_track_ai_coaching(track_id: str) -> dict:
+    track = get_track(track_id)
+    if track is None:
+        raise HTTPException(status_code=404, detail=f"Track '{track_id}' not found")
+
+    stats = compute_track_stats(track)
+    try:
+        return generate_track_guidance(track, stats)
+    except RuntimeError as exc:
+        raise HTTPException(status_code=503, detail=str(exc)) from exc
 
 
 @app.get("/tracks/{track_id}/areas/{area_id}/topics/{topic_id}/mapping-options")

@@ -1,12 +1,14 @@
 import { useEffect, useState } from 'react'
-import { getTrack, getTrackStats } from '../api'
+import { getAiCoach, getTrack, getTrackStats } from '../api'
 import { useTrack } from '../TrackContext'
 
 function Dashboard() {
   const { trackId, trackName, loading: tracksLoading } = useTrack()
   const [stats, setStats] = useState(null)
   const [track, setTrack] = useState(null)
+  const [aiCoach, setAiCoach] = useState(null)
   const [loading, setLoading] = useState(true)
+  const [aiLoading, setAiLoading] = useState(false)
   const [error, setError] = useState('')
 
   useEffect(() => {
@@ -43,7 +45,30 @@ function Dashboard() {
       }
     }
 
+    async function loadAiCoach() {
+      try {
+        setAiLoading(true)
+        const coachData = await getAiCoach(trackId)
+        if (!ignore) {
+          setAiCoach(coachData)
+        }
+      } catch (err) {
+        if (!ignore) {
+          setAiCoach({
+            summary: 'Gemini is not configured yet. Add GEMINI_API_KEY or GOOGLE_API_KEY in your secrets/environment and refresh the page.',
+            focus_areas: ['Set your Gemini API key', 'Refresh the dashboard', 'Continue learning'],
+            next_actions: ['Add the secret to the backend environment', 'Restart the API service', 'Let the AI coach guide your next study block'],
+          })
+        }
+      } finally {
+        if (!ignore) {
+          setAiLoading(false)
+        }
+      }
+    }
+
     loadDashboardData()
+    loadAiCoach()
     return () => {
       ignore = true
     }
@@ -196,6 +221,40 @@ function Dashboard() {
           <p>{nextUpTitle}</p>
           <p className="sidebar-copy">{nextUpCopy}</p>
           <button className="secondary-cta" type="button">{stats.remaining_topics === 0 ? 'Review roadmap' : 'Go to Roadmap'}</button>
+        </section>
+
+        <section className="panel ai-panel">
+          <div className="panel-badge">AI coach</div>
+          <div className="sidebar-title-row">
+            <span className="sidebar-symbol">✦</span>
+            <h3>Smart guidance</h3>
+          </div>
+
+          {aiLoading ? (
+            <p className="sidebar-copy">Generating your study guidance...</p>
+          ) : aiCoach ? (
+            <>
+              <p className="ai-summary">{aiCoach.summary}</p>
+              <div className="ai-list-wrap">
+                <h4>Focus areas</h4>
+                <ul className="ai-list">
+                  {(aiCoach.focus_areas || []).map((item) => (
+                    <li key={item}>{item}</li>
+                  ))}
+                </ul>
+              </div>
+              <div className="ai-list-wrap">
+                <h4>Next actions</h4>
+                <ul className="ai-list">
+                  {(aiCoach.next_actions || []).map((item) => (
+                    <li key={item}>{item}</li>
+                  ))}
+                </ul>
+              </div>
+            </>
+          ) : (
+            <p className="sidebar-copy">AI guidance will appear here once the Gemini key is configured.</p>
+          )}
         </section>
 
         <section className="panel weekly-panel">

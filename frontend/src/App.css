@@ -1224,6 +1224,37 @@ select {
   grid-column: 1 / -1;
 }
 
+.ai-panel {
+  padding: 1.1rem 1rem 1rem;
+}
+
+.ai-summary {
+  margin: 0.8rem 0 0.9rem;
+  color: var(--text-200);
+  line-height: 1.6;
+}
+
+.ai-list-wrap {
+  margin-top: 0.9rem;
+}
+
+.ai-list-wrap h4 {
+  margin: 0 0 0.5rem;
+  font-size: 0.77rem;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--text-300);
+}
+
+.ai-list {
+  margin: 0;
+  padding-left: 1.1rem;
+  color: var(--text-200);
+  display: grid;
+  gap: 0.45rem;
+  line-height: 1.55;
+}
+
 @media (max-width: 1160px) {
   .topnav {
     flex-wrap: wrap;
