@@ -26,6 +26,13 @@ Next: Filesystem & shell
 
 #### 2026 09 24
 
+## Notes
+
+### Mlops
+
+#### Docker
+
+      - [Docker Fundamentals](Notes/mlops/docker/docker-fundamentals.md)
 <!-- INDEX:END -->
 
 <!-- DETAILED-DASHBOARD:START -->
