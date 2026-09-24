@@ -1658,6 +1658,321 @@
           ]
         }
       ]
+    },
+    {
+      "id": "data-engineering",
+      "name": "Data Engineering",
+      "areas": [
+        {
+          "id": "sql-fundamentals",
+          "name": "SQL Fundamentals",
+          "topics": [
+            {
+              "id": "sql-core-queries",
+              "name": "Core SQL Queries",
+              "week": 1,
+              "type": "Learn",
+              "subtopics": [
+                "SELECT and filtering",
+                "joins and unions",
+                "aggregations and grouping",
+                "subqueries"
+              ],
+              "learning_outcome": "Explain how to retrieve and combine relational data using joins, aggregations, and subqueries.",
+              "project_task": "Write 10 SQL queries against a sample e-commerce database covering joins, group by, and subqueries.",
+              "depends_on": [],
+              "done": false
+            },
+            {
+              "id": "sql-window-functions",
+              "name": "Window Functions & Advanced SQL",
+              "week": 1,
+              "type": "Learn",
+              "subtopics": [
+                "window functions",
+                "CTEs",
+                "ranking and partitioning",
+                "query optimization basics"
+              ],
+              "learning_outcome": "Use window functions and CTEs to solve analytical queries efficiently.",
+              "project_task": "Rewrite three nested-subquery reports using CTEs and window functions instead.",
+              "depends_on": [
+                "sql-core-queries"
+              ],
+              "done": false
+            }
+          ]
+        },
+        {
+          "id": "data-warehousing",
+          "name": "Data Warehousing Basics",
+          "topics": [
+            {
+              "id": "warehouse-concepts",
+              "name": "Data Warehouse Concepts",
+              "week": 2,
+              "type": "Learn",
+              "subtopics": [
+                "OLTP vs OLAP",
+                "star and snowflake schema",
+                "fact and dimension tables",
+                "slowly changing dimensions"
+              ],
+              "learning_outcome": "Describe how data warehouses are modeled differently from transactional databases.",
+              "project_task": "Design a star schema for an orders dataset with at least two dimension tables and one SCD Type 2 dimension.",
+              "depends_on": [
+                "sql-core-queries"
+              ],
+              "done": false
+            },
+            {
+              "id": "cloud-warehouse-platforms",
+              "name": "Cloud Warehouse Platforms",
+              "week": 2,
+              "type": "Learn",
+              "subtopics": [
+                "Snowflake or BigQuery basics",
+                "storage vs compute separation",
+                "partitioning and clustering",
+                "cost management"
+              ],
+              "learning_outcome": "Explain how modern cloud warehouses separate storage and compute and how that affects cost and performance.",
+              "project_task": "Load a sample dataset into a free-tier cloud warehouse and run partitioned queries against it.",
+              "depends_on": [
+                "warehouse-concepts"
+              ],
+              "done": false
+            }
+          ]
+        },
+        {
+          "id": "etl-elt-pipelines",
+          "name": "ETL/ELT Pipelines",
+          "topics": [
+            {
+              "id": "etl-vs-elt",
+              "name": "ETL vs ELT Patterns",
+              "week": 3,
+              "type": "Learn",
+              "subtopics": [
+                "extract-transform-load",
+                "extract-load-transform",
+                "data ingestion patterns",
+                "idempotency"
+              ],
+              "learning_outcome": "Compare ETL and ELT approaches and identify when each is appropriate.",
+              "project_task": "Diagram an ELT pipeline for ingesting raw CSV data into a warehouse and transforming it downstream.",
+              "depends_on": [
+                "warehouse-concepts"
+              ],
+              "done": false
+            },
+            {
+              "id": "python-data-pipelines",
+              "name": "Building Pipelines in Python",
+              "week": 3,
+              "type": "Build",
+              "subtopics": [
+                "pandas for transforms",
+                "incremental loads",
+                "error handling",
+                "logging"
+              ],
+              "learning_outcome": "Build a Python script that extracts, transforms, and loads data into a warehouse table.",
+              "project_task": "Write a Python script that ingests a CSV file, cleans it with pandas, and loads it into a warehouse table.",
+              "depends_on": [
+                "etl-vs-elt"
+              ],
+              "done": false
+            }
+          ]
+        },
+        {
+          "id": "orchestration",
+          "name": "Airflow Orchestration",
+          "topics": [
+            {
+              "id": "airflow-basics",
+              "name": "Airflow Core Concepts",
+              "week": 4,
+              "type": "Learn",
+              "subtopics": [
+                "DAGs and tasks",
+                "operators",
+                "scheduling",
+                "the Airflow UI"
+              ],
+              "learning_outcome": "Explain how Airflow represents workflows as DAGs and schedules task execution.",
+              "project_task": "Install Airflow locally and run the example DAGs, inspecting the UI for task states.",
+              "depends_on": [
+                "python-data-pipelines"
+              ],
+              "done": false
+            },
+            {
+              "id": "airflow-pipeline-build",
+              "name": "Building a Pipeline DAG",
+              "week": 4,
+              "type": "Build",
+              "subtopics": [
+                "custom operators",
+                "task dependencies",
+                "retries and alerts",
+                "sensors"
+              ],
+              "learning_outcome": "Build a DAG that orchestrates a multi-step data pipeline with proper dependency handling.",
+              "project_task": "Convert the earlier Python ETL script into an Airflow DAG with retries and failure alerts.",
+              "depends_on": [
+                "airflow-basics"
+              ],
+              "done": false
+            }
+          ]
+        },
+        {
+          "id": "dbt-transformations",
+          "name": "dbt",
+          "topics": [
+            {
+              "id": "dbt-fundamentals",
+              "name": "dbt Fundamentals",
+              "week": 5,
+              "type": "Learn",
+              "subtopics": [
+                "models and materializations",
+                "sources and seeds",
+                "Jinja templating",
+                "project structure"
+              ],
+              "learning_outcome": "Explain how dbt manages SQL transformations as version-controlled, testable models.",
+              "project_task": "Set up a dbt project and create three models building on a raw source table.",
+              "depends_on": [
+                "cloud-warehouse-platforms"
+              ],
+              "done": false
+            },
+            {
+              "id": "dbt-testing-docs",
+              "name": "dbt Testing & Documentation",
+              "week": 5,
+              "type": "Build",
+              "subtopics": [
+                "schema tests",
+                "custom tests",
+                "documentation generation",
+                "dbt lineage graph"
+              ],
+              "learning_outcome": "Add tests and documentation to a dbt project to ensure data quality and discoverability.",
+              "project_task": "Add not-null, unique, and relationship tests to your dbt models and generate the docs site.",
+              "depends_on": [
+                "dbt-fundamentals"
+              ],
+              "done": false
+            },
+            {
+              "id": "dbt-airflow-integration",
+              "name": "Integrating dbt with Airflow",
+              "week": 6,
+              "type": "Build",
+              "subtopics": [
+                "triggering dbt from Airflow",
+                "dbt Cloud vs dbt core",
+                "pipeline scheduling"
+              ],
+              "learning_outcome": "Orchestrate dbt transformations as part of a scheduled Airflow pipeline.",
+              "project_task": "Add a task to your Airflow DAG that triggers a dbt run after data ingestion completes.",
+              "depends_on": [
+                "dbt-testing-docs",
+                "airflow-pipeline-build"
+              ],
+              "done": false
+            }
+          ]
+        },
+        {
+          "id": "batch-vs-streaming",
+          "name": "Batch vs Streaming",
+          "topics": [
+            {
+              "id": "batch-processing-concepts",
+              "name": "Batch Processing Concepts",
+              "week": 6,
+              "type": "Review",
+              "subtopics": [
+                "batch windows",
+                "backfills",
+                "latency tradeoffs"
+              ],
+              "learning_outcome": "Summarize the tradeoffs of batch processing in terms of latency and throughput.",
+              "project_task": "Write a short comparison of your Airflow pipeline's latency versus a hypothetical streaming alternative.",
+              "depends_on": [
+                "airflow-pipeline-build"
+              ],
+              "done": false
+            },
+            {
+              "id": "streaming-fundamentals",
+              "name": "Streaming Fundamentals",
+              "week": 7,
+              "type": "Learn",
+              "subtopics": [
+                "Kafka basics",
+                "producers and consumers",
+                "event time vs processing time",
+                "windowing"
+              ],
+              "learning_outcome": "Explain the core concepts behind stream processing and how it differs from batch.",
+              "project_task": "Set up a local Kafka instance and produce/consume a stream of sample events.",
+              "depends_on": [
+                "batch-processing-concepts"
+              ],
+              "done": false
+            }
+          ]
+        },
+        {
+          "id": "capstone",
+          "name": "Capstone Project",
+          "topics": [
+            {
+              "id": "capstone-pipeline-design",
+              "name": "Capstone Pipeline Design",
+              "week": 8,
+              "type": "Build",
+              "subtopics": [
+                "end-to-end architecture",
+                "source selection",
+                "schema design"
+              ],
+              "learning_outcome": "Design an end-to-end data pipeline architecture combining ingestion, transformation, and orchestration.",
+              "project_task": "Produce an architecture diagram for a capstone pipeline ingesting a real public dataset.",
+              "depends_on": [
+                "dbt-airflow-integration",
+                "streaming-fundamentals"
+              ],
+              "done": false
+            },
+            {
+              "id": "capstone-implementation",
+              "name": "Capstone Implementation",
+              "week": 8,
+              "type": "Build",
+              "subtopics": [
+                "pipeline build",
+                "dbt models",
+                "Airflow scheduling",
+                "final validation"
+              ],
+              "learning_outcome": "Implement and validate a complete data pipeline from raw ingestion to analytics-ready tables.",
+              "project_task": "Build and run the full capstone pipeline end-to-end, from ingestion through dbt-transformed final tables.",
+              "depends_on": [
+                "capstone-pipeline-design"
+              ],
+              "done": false
+            }
+          ]
+        }
+      ]
     }
   ]
 }
