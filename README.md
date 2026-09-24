@@ -28,6 +28,8 @@ Next: Filesystem & shell
 
 #### Assets
 
+#### Pages
+
   - [Readme](frontend/README.md)
 ## Inbox
 
