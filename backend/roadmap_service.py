@@ -4,7 +4,7 @@ import json
 from pathlib import Path
 from typing import Any, Dict, List
 
-from models import Area, Roadmap, Track
+from models import Area, Roadmap, Topic, Track
 
 ROOT_DIR = Path(__file__).resolve().parent.parent
 ROADMAP_PATH = ROOT_DIR / "roadmap.json"
@@ -21,6 +21,18 @@ def get_track(track_id: str) -> Track | None:
     for track in roadmap.tracks:
         if track.id == track_id:
             return track
+    return None
+
+
+def get_topic(track_id: str, area_id: str, topic_id: str) -> Topic | None:
+    track = get_track(track_id)
+    if track is None:
+        return None
+    for area in track.areas:
+        if area.id == area_id:
+            for topic in area.topics:
+                if topic.id == topic_id:
+                    return topic
     return None
 
 
