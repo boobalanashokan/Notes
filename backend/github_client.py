@@ -82,6 +82,13 @@ class GitHubRepoClient:
 
         ref = self._repo.get_git_ref(f"heads/{self.branch}")
         current_commit = self._repo.get_commit(ref.object.sha)
+        if hasattr(current_commit, "commit") and hasattr(current_commit.commit, "tree"):
+            base_tree_sha = current_commit.commit.tree.sha
+        elif hasattr(current_commit, "tree"):
+            base_tree_sha = current_commit.tree.sha
+        else:
+            raise ValueError("Could not determine the current repository tree SHA for the commit request.")
+
         tree_items: list[dict[str, str]] = []
 
         for file_item in files:
@@ -110,7 +117,7 @@ class GitHubRepoClient:
                 "sha": blob.sha,
             })
 
-        new_tree = self._repo.create_git_tree(tree_items, base_tree=current_commit.tree)
+        new_tree = self._repo.create_git_tree(tree_items, base_tree=base_tree_sha)
         new_commit = self._repo.create_git_commit(message, new_tree, [current_commit])
         ref.edit(sha=new_commit.sha)
         return {"commit_sha": new_commit.sha}
