@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import json
+import mimetypes
 import os
 import re
 from datetime import datetime, timezone
@@ -9,7 +10,7 @@ from typing import Any
 
 from fastapi import Body, FastAPI, File, HTTPException, UploadFile
 from fastapi.middleware.cors import CORSMiddleware
-from fastapi.responses import JSONResponse
+from fastapi.responses import JSONResponse, Response
 from pydantic import ValidationError
 
 from ai_service import generate_track_guidance
@@ -169,6 +170,46 @@ def get_track_ai_coaching(track_id: str) -> dict:
                 "Set a 20-minute study block and complete one focused task.",
             ],
         }
+
+
+@app.get("/tracks/{track_id}/areas/{area_id}/topics/{topic_id}/note")
+def get_topic_note(track_id: str, area_id: str, topic_id: str) -> dict:
+    topic = _validated_topic_or_404(track_id, area_id, topic_id)
+    file_path = markdown_path(track_id, area_id, topic_id)
+    content = read_existing_markdown(track_id, area_id, topic_id)
+    source_files = []
+    if content:
+        source_files = re.findall(r"^\- \[[^\]]+\]\(([^)]+)\)", content, flags=re.MULTILINE)
+    return {
+        "topic_name": topic.name,
+        "target_path": file_path,
+        "file_exists": content is not None,
+        "content": content or "",
+        "source_files": source_files,
+    }
+
+
+@app.get("/files")
+def get_repo_file(path: str) -> Response:
+    if not path:
+        raise HTTPException(status_code=400, detail="A repo path is required")
+
+    normalized = path.strip("/")
+    if not normalized or not normalized.startswith(("Inbox/", "Notes/")):
+        raise HTTPException(status_code=400, detail="Only Notes/ and Inbox/ files can be viewed inline")
+
+    client = _get_repo_client()
+    payload, _ = client.get_binary_file(normalized)
+    if payload is None:
+        raise HTTPException(status_code=404, detail=f"File not found: {normalized}")
+
+    media_type = mimetypes.guess_type(normalized)[0] or "application/octet-stream"
+    filename = Path(normalized).name
+    return Response(
+        payload,
+        media_type=media_type,
+        headers={"Content-Disposition": f'inline; filename="{filename}"'},
+    )
 
 
 @app.get("/tracks/{track_id}/areas/{area_id}/topics/{topic_id}/mapping-options")

@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react'
-import { getTrack } from '../api'
+import { API_BASE, getFileViewerUrl, getTopicNote, getTrack } from '../api'
 import { useTrack } from '../TrackContext'
 
 function Notes() {
@@ -8,6 +8,8 @@ function Notes() {
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState('')
   const [expandedTopics, setExpandedTopics] = useState({})
+  const [topicNotes, setTopicNotes] = useState({})
+  const [noteLoading, setNoteLoading] = useState({})
 
   useEffect(() => {
     if (tracksLoading || !trackId) {
@@ -43,11 +45,43 @@ function Notes() {
     }
   }, [trackId, tracksLoading])
 
-  const toggleTopic = (topicId) => {
+  const fetchTopicNote = async (areaId, topicId) => {
+    if (!trackId || !areaId || !topicId || topicNotes[topicId]) {
+      return
+    }
+
+    setNoteLoading((current) => ({ ...current, [topicId]: true }))
+    try {
+      const payload = await getTopicNote(trackId, areaId, topicId)
+      setTopicNotes((current) => ({
+        ...current,
+        [topicId]: payload,
+      }))
+    } catch (err) {
+      setTopicNotes((current) => ({
+        ...current,
+        [topicId]: {
+          target_path: '',
+          file_exists: false,
+          content: '',
+          error: err.message || 'Could not load this topic note.',
+        },
+      }))
+    } finally {
+      setNoteLoading((current) => ({ ...current, [topicId]: false }))
+    }
+  }
+
+  const toggleTopic = async (areaId, topicId) => {
+    const nextExpanded = !expandedTopics[topicId]
     setExpandedTopics((current) => ({
       ...current,
-      [topicId]: !current[topicId],
+      [topicId]: nextExpanded,
     }))
+
+    if (nextExpanded) {
+      await fetchTopicNote(areaId, topicId)
+    }
   }
 
   if (tracksLoading || !trackId || loading) {
@@ -91,7 +125,7 @@ function Notes() {
                       <button
                         type="button"
                         className="topic-toggle-button"
-                        onClick={() => toggleTopic(topic.id)}
+                        onClick={() => toggleTopic(area.id, topic.id)}
                       >
                         <h4>{topic.name}</h4>
                       </button>
@@ -123,7 +157,70 @@ function Notes() {
                         </div>
 
                         <div className="detail-block">
-                          <strong>Full note content viewing coming soon</strong>
+                          <strong>Saved note</strong>
+                          {noteLoading[topic.id] ? (
+                            <p>Loading note...</p>
+                          ) : (() => {
+                            const note = topicNotes[topic.id]
+                            if (note?.error) {
+                              return <p>{note.error}</p>
+                            }
+                            if (!note?.file_exists) {
+                              return <p>No note has been saved for this topic yet.</p>
+                            }
+                            return (
+                              <>
+                                <pre style={{ whiteSpace: 'pre-wrap', marginTop: '0.5rem', background: '#f5f7fb', padding: '0.75rem', borderRadius: '8px' }}>
+                                  {note.content || 'No content saved in this note yet.'}
+                                </pre>
+
+                                {Array.isArray(note.source_files) && note.source_files.length > 0 && (
+                                  <div style={{ marginTop: '1rem' }}>
+                                    <strong>Source files</strong>
+                                    <div style={{ display: 'grid', gap: '1rem', marginTop: '0.75rem' }}>
+                                      {note.source_files.map((sourcePath) => {
+                                        const fileName = sourcePath.split('/').pop() || sourcePath
+                                        const extension = (fileName.split('.').pop() || '').toLowerCase()
+                                        const viewerUrl = getFileViewerUrl(sourcePath)
+
+                                        if (['pdf'].includes(extension)) {
+                                          return (
+                                            <div key={sourcePath}>
+                                              <p style={{ marginBottom: '0.5rem' }}>{fileName}</p>
+                                              <iframe
+                                                src={viewerUrl}
+                                                title={fileName}
+                                                style={{ width: '100%', minHeight: '560px', border: '1px solid #dfe3ea', borderRadius: '8px', background: '#fff' }}
+                                              />
+                                            </div>
+                                          )
+                                        }
+
+                                        if (['png', 'jpg', 'jpeg', 'gif', 'webp'].includes(extension)) {
+                                          return (
+                                            <div key={sourcePath}>
+                                              <p style={{ marginBottom: '0.5rem' }}>{fileName}</p>
+                                              <img
+                                                src={viewerUrl}
+                                                alt={fileName}
+                                                style={{ maxWidth: '100%', borderRadius: '8px', border: '1px solid #dfe3ea' }}
+                                              />
+                                            </div>
+                                          )
+                                        }
+
+                                        return (
+                                          <a key={sourcePath} href={viewerUrl} target="_blank" rel="noreferrer" style={{ display: 'inline-block', marginTop: '0.25rem' }}>
+                                            Open {fileName}
+                                          </a>
+                                        )
+                                      })}
+                                    </div>
+                                  </div>
+                                )}
+                              </>
+                            )
+                          })()}
                         </div>
                       </div>
                     )}

@@ -36,6 +36,14 @@ export async function getTrack(trackId) {
   return requestJson(`${API_BASE}/tracks/${trackId}`)
 }
 
+export async function getTopicNote(trackId, areaId, topicId) {
+  return requestJson(`${API_BASE}/tracks/${trackId}/areas/${areaId}/topics/${topicId}/note`)
+}
+
+export function getFileViewerUrl(path) {
+  return `${API_BASE}/files?path=${encodeURIComponent(path)}`
+}
+
 export async function getAiCoach(trackId) {
   return requestJson(`${API_BASE}/tracks/${trackId}/ai/coaching`)
 }
