@@ -367,7 +367,7 @@ async def upload_files(track_id: str, files: list[UploadFile] = File(...)) -> di
     if not files:
         raise HTTPException(status_code=400, detail="At least one file is required")
 
-    allowed = {".pdf", ".png", ".jpg", ".jpeg"}
+    allowed = {".pdf", ".png", ".jpg", ".jpeg", ".gif", ".webp"}
     validated: list[tuple[str, bytes]] = []
     for file in files:
         suffix = "." + (file.filename or "").split(".")[-1].lower() if "." in (file.filename or "") else ""

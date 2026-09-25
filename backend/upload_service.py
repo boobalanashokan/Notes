@@ -5,7 +5,7 @@ from pathlib import Path
 
 from github_client import GitHubRepoClient
 
-ALLOWED_EXTENSIONS = {".pdf", ".png", ".jpg", ".jpeg"}
+ALLOWED_EXTENSIONS = {".pdf", ".png", ".jpg", ".jpeg", ".gif", ".webp"}
 
 
 def _next_available_path(target_dir: str, filename: str, existing_names: list[str]) -> str:

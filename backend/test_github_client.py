@@ -41,6 +41,7 @@ class FakeRepo:
     def create_git_tree(self, items, base_tree=None):
         assert isinstance(items, list)
         assert all(item["path"] for item in items)
+        assert len({item["path"] for item in items}) == len(items)
         return FakeTree("new-tree")
 
     def create_git_commit(self, message, tree, parents):
@@ -66,3 +67,20 @@ def test_put_multiple_files_returns_commit_sha_only(monkeypatch):
     assert result == {"commit_sha": "new-commit"}
     assert isinstance(result, dict)
     assert set(result.keys()) == {"commit_sha"}
+
+
+def test_put_multiple_files_ignores_duplicate_paths():
+    client = GitHubRepoClient.__new__(GitHubRepoClient)
+    client.branch = "main"
+    client._repo = FakeRepo()
+
+    result = client.put_multiple_files(
+        [
+            {"path": "Inbox/mlops/2026-09-25/git-rpo.png", "content": b"img-1", "is_binary": True},
+            {"path": "Inbox/mlops/2026-09-25/git-rpo.png", "content": b"img-2", "is_binary": True},
+            {"path": "Notes/mlops/linux/filesystem-shell.md", "content": "# Notes\n", "is_binary": False},
+        ],
+        "Upload note attachments",
+    )
+
+    assert result == {"commit_sha": "new-commit"}

@@ -1,6 +1,19 @@
+from datetime import date
+
 from fastapi.testclient import TestClient
 
 from main import app
+from upload_service import save_upload
+
+
+def test_upload_service_accepts_common_image_types():
+    class FakeClient:
+        def list_directory(self, _path):
+            return []
+
+    day = date.today().strftime("%Y-%m-%d")
+    assert save_upload("mlops", "diagram.webp", b"image-bytes", FakeClient()) == f"Inbox/mlops/{day}/diagram.webp"
+    assert save_upload("mlops", "drawing.gif", b"gif-bytes", FakeClient()) == f"Inbox/mlops/{day}/drawing.gif"
 
 
 def test_topic_note_endpoint_returns_existing_markdown(monkeypatch):

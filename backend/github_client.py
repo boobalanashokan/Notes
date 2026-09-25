@@ -90,9 +90,14 @@ class GitHubRepoClient:
             raise ValueError("Could not determine the current repository tree SHA for the commit request.")
 
         tree_items: list[dict[str, str]] = []
+        seen_paths: set[str] = set()
 
         for file_item in files:
             path = str(file_item["path"]).strip("/")
+            if not path or path in seen_paths:
+                continue
+            seen_paths.add(path)
+
             content = file_item["content"]
             is_binary = bool(file_item.get("is_binary", False))
 

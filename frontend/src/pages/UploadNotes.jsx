@@ -8,7 +8,7 @@ import {
 } from '../api'
 import { useTrack } from '../TrackContext'
 
-const VALID_EXTENSIONS = new Set(['.pdf', '.png', '.jpg', '.jpeg'])
+const VALID_EXTENSIONS = new Set(['.pdf', '.png', '.jpg', '.jpeg', '.gif', '.webp'])
 
 function getFileExtension(filename) {
   const lower = (filename || '').toLowerCase()
@@ -418,7 +418,7 @@ function UploadNotes() {
             id="upload-notes-input"
             type="file"
             multiple
-            accept=".pdf,.png,.jpg,.jpeg"
+            accept=".pdf,.png,.jpg,.jpeg,.gif,.webp"
             onChange={(event) => {
               addFiles(event.target.files)
               event.target.value = ''
@@ -427,7 +427,7 @@ function UploadNotes() {
           />
           <label htmlFor="upload-notes-input" className="upload-label">
             <span className="upload-drop-title">Drag and drop files here</span>
-            <span className="upload-drop-subtitle">or click to browse (.pdf, .png, .jpg, .jpeg)</span>
+            <span className="upload-drop-subtitle">or click to browse (.pdf, .png, .jpg, .jpeg, .gif, .webp)</span>
           </label>
         </div>
 
