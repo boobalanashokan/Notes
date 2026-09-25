@@ -110,7 +110,16 @@ function UploadNotes() {
       return
     }
 
-    setSelectedFiles((current) => [...current, ...validFiles])
+    const keyFor = (file) => `${file.name}:${file.size}:${file.lastModified}`
+    const existingKeys = new Set(selectedFiles.map(keyFor))
+    const deduped = validFiles.filter((file) => !existingKeys.has(keyFor(file)))
+
+    if (deduped.length === 0) {
+      setUploadError('These files are already selected.')
+      return
+    }
+
+    setSelectedFiles((current) => [...current, ...deduped])
     setUploadError('')
   }
 
@@ -410,7 +419,10 @@ function UploadNotes() {
             type="file"
             multiple
             accept=".pdf,.png,.jpg,.jpeg"
-            onChange={(event) => addFiles(event.target.files)}
+            onChange={(event) => {
+              addFiles(event.target.files)
+              event.target.value = ''
+            }}
             style={{ display: 'none' }}
           />
           <label htmlFor="upload-notes-input" className="upload-label">
