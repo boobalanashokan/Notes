@@ -2,7 +2,6 @@
 
 > Automatically generated from the first incomplete roadmap units.
 
-- [ ] **filesystem-shell - Linux - Filesystem & shell** - Create repo setup notes and a shell script that creates the project structure.
 - [ ] **environment-configuration - Linux - Environment & configuration** - Create a local configuration pattern for the project; keep secrets out of Git.
 - [ ] **processes - Linux - Processes** - Run the FastAPI prototype as a process and practice stopping/restarting it.
 - [ ] **logs-services - Linux - Logs & services** - Intentionally create a failing local service and document how you diagnose it.
@@ -14,3 +13,4 @@
 - [ ] **dns - Networking - DNS** - Use DNS tools to troubleshoot a sample service hostname.
 - [ ] **http-https - Networking - HTTP/HTTPS** - Test FastAPI endpoints with curl and inspect requests/responses.
 - [ ] **service-networking - Networking - Service networking** - Document how traffic reaches the inference service.
+- [ ] **git-fundamentals-refresh - Git - Git fundamentals refresh** - Create a clean branching workflow for the project.

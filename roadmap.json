@@ -25,7 +25,7 @@
               "learning_outcome": "Understand and be able to explain: pwd / ls / cd, cp / mv / rm, mkdir / touch, cat / less / head / tail.",
               "project_task": "Create repo setup notes and a shell script that creates the project structure.",
               "depends_on": [],
-              "done": false
+              "done": true
             },
             {
               "id": "environment-configuration",

@@ -15,7 +15,7 @@ A note existing by itself never marks work complete.
 ### filesystem-shell - Week 1 - Linux - Filesystem & shell
 
 - **Type:** Learn
-- **Done?:** [ ]
+- **Done?:** [x]
 - **Depends On:** None
 - **Learning / Outcome:** Understand and be able to explain: pwd / ls / cd, cp / mv / rm, mkdir / touch, cat / less / head / tail.
 - **Subtopics to Learn:

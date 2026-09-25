@@ -4,7 +4,7 @@
 
 | Area          | Units | Done | Progress |
 | ------------- | ----- | ---- | -------- |
-| Linux         | 8     | 0    | 0%       |
+| Linux         | 8     | 1    | 12%      |
 | Networking    | 4     | 0    | 0%       |
 | Git           | 2     | 0    | 0%       |
 | GCP           | 8     | 0    | 0%       |

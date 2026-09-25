@@ -97,8 +97,7 @@ class GitHubRepoClient:
             is_binary = bool(file_item.get("is_binary", False))
 
             if isinstance(content, str):
-                text = content
-                blob_content = text
+                blob_content = content
                 if is_binary:
                     blob_content = base64.b64encode(content.encode("utf-8")).decode("ascii")
                     blob_encoding = "base64"
@@ -106,8 +105,12 @@ class GitHubRepoClient:
                     blob_encoding = "utf-8"
             else:
                 payload = content if isinstance(content, bytes) else bytes(content)
-                blob_content = base64.b64encode(payload).decode("ascii") if is_binary else payload.decode("utf-8")
-                blob_encoding = "base64" if is_binary else "utf-8"
+                if is_binary:
+                    blob_content = base64.b64encode(payload).decode("ascii")
+                    blob_encoding = "base64"
+                else:
+                    blob_content = payload.decode("utf-8")
+                    blob_encoding = "utf-8"
 
             blob = self._repo.create_git_blob(blob_content, blob_encoding)
             tree_items.append({
@@ -120,7 +123,9 @@ class GitHubRepoClient:
         new_tree = self._repo.create_git_tree(tree_items, base_tree=base_tree_sha)
         new_commit = self._repo.create_git_commit(message, new_tree, [current_commit])
         ref.edit(sha=new_commit.sha)
-        return {"commit_sha": new_commit.sha}
+
+        result = {"commit_sha": str(new_commit.sha)}
+        return result
 
     def list_directory(self, path: str) -> list[str]:
         normalized = path.strip("/")
