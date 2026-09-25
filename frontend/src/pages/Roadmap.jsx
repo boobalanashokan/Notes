@@ -82,6 +82,17 @@ function Roadmap() {
     return <div className="page-shell"><div className="card error-box"><p>{error}</p></div></div>
   }
 
+  if (!track?.areas?.length) {
+    return (
+      <div className="page-shell">
+        <div className="card empty-state-box">
+          <h3>No roadmap data yet</h3>
+          <p>Add a track or refresh the data to see the roadmap here.</p>
+        </div>
+      </div>
+    )
+  }
+
   return (
     <div className="page-shell roadmap-page">
       <div className="card filter-card">
@@ -107,6 +118,13 @@ function Roadmap() {
       </div>
 
       <div className="area-stack">
+        {!filteredAreas.length ? (
+          <div className="card empty-state-box">
+            <h3>No topics match the current filters</h3>
+            <p>Try a different area or status selection to see the roadmap again.</p>
+          </div>
+        ) : null}
+
         {filteredAreas.map((area) => {
           const isExpanded = expandedAreas[area.id] ?? false
           const visibleTopics = area.topics.filter((topic) => {

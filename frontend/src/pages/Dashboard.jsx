@@ -82,6 +82,17 @@ function Dashboard() {
     return <div className="page-shell"><div className="card error-box"><p>{error}</p></div></div>
   }
 
+  if (!stats || !track) {
+    return (
+      <div className="page-shell">
+        <div className="card empty-state-box">
+          <h3>No dashboard data yet</h3>
+          <p>Select a track or add one before continuing your learning journey.</p>
+        </div>
+      </div>
+    )
+  }
+
   const progressValue = Math.round(stats.percent_complete || 0)
   const topicList = track?.areas?.flatMap((area) => area.topics.map((topic) => ({ ...topic, area_name: area.name }))) || []
   const weeksInTracker = topicList.length ? Math.max(...topicList.map((topic) => Number(topic.week) || 0)) : 0

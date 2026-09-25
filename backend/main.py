@@ -380,11 +380,19 @@ async def upload_files(track_id: str, files: list[UploadFile] = File(...)) -> di
 
     saved_files: list[str] = []
     commit_files: list[dict[str, Any]] = []
+    seen_batch_names: set[str] = set()
     try:
         for filename, content in validated:
-            rel_path = save_upload(track_id, filename, content, _get_repo_client())
+            rel_path = save_upload(
+                track_id,
+                filename,
+                content,
+                _get_repo_client(),
+                reserved_names=list(seen_batch_names),
+            )
             saved_files.append(rel_path)
             commit_files.append({"path": rel_path, "content": content, "is_binary": True})
+            seen_batch_names.add(Path(rel_path).name)
 
         commit_result = _get_repo_client().put_multiple_files(
             commit_files,

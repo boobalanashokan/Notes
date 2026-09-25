@@ -73,6 +73,17 @@ function Projects() {
     return <div className="page-shell"><div className="card error-box"><p>{error}</p></div></div>
   }
 
+  if (!projects.length) {
+    return (
+      <div className="page-shell">
+        <div className="card empty-state-box">
+          <h3>No project tasks yet</h3>
+          <p>This track does not have any project tasks assigned yet.</p>
+        </div>
+      </div>
+    )
+  }
+
   return (
     <div className="page-shell">
       <div className="card page-header-card">

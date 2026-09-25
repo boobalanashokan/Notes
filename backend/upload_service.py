@@ -19,7 +19,13 @@ def _next_available_path(target_dir: str, filename: str, existing_names: list[st
     return f"{target_dir}/{candidate}"
 
 
-def save_upload(track_id: str, filename: str, content: bytes, client: GitHubRepoClient | None = None) -> str:
+def save_upload(
+    track_id: str,
+    filename: str,
+    content: bytes,
+    client: GitHubRepoClient | None = None,
+    reserved_names: list[str] | None = None,
+) -> str:
     if not filename:
         raise ValueError("Filename is required")
 
@@ -30,5 +36,7 @@ def save_upload(track_id: str, filename: str, content: bytes, client: GitHubRepo
     client = client or GitHubRepoClient()
     day = date.today().strftime("%Y-%m-%d")
     target_dir = f"Inbox/{track_id}/{day}"
-    existing_names = client.list_directory(target_dir)
+    repo_names = client.list_directory(target_dir)
+    current_names = list(reserved_names or [])
+    existing_names = sorted(set(repo_names) | set(current_names))
     return _next_available_path(target_dir, filename, existing_names)

@@ -197,6 +197,17 @@ function Notes() {
     return <div className="page-shell"><div className="card error-box"><p>{error}</p></div></div>
   }
 
+  if (!track?.areas?.length) {
+    return (
+      <div className="page-shell">
+        <div className="card empty-state-box">
+          <h3>No track data available</h3>
+          <p>Select a valid track or add a roadmap before opening the notes view.</p>
+        </div>
+      </div>
+    )
+  }
+
   return (
     <div className="page-shell notes-page">
       <div className="card page-header-card">
@@ -271,7 +282,7 @@ function Notes() {
                               return <p>{note.error}</p>
                             }
                             if (!note?.file_exists) {
-                              return <p>No note has been saved for this topic yet.</p>
+                              return <p>No note has been saved for this topic yet. Upload or approve a note to populate this section.</p>
                             }
                             return (
                               <>
@@ -290,7 +301,7 @@ function Notes() {
                                   {renderMarkdownContent(note.content || 'No content saved in this note yet.')}
                                 </div>
 
-                                {Array.isArray(note.source_files) && note.source_files.length > 0 && (
+                                {Array.isArray(note.source_files) && note.source_files.length > 0 ? (
                                   <div style={{ marginTop: '1rem' }}>
                                     <strong>Source files</strong>
                                     <div style={{ display: 'grid', gap: '1rem', marginTop: '0.75rem' }}>
@@ -333,6 +344,8 @@ function Notes() {
                                       })}
                                     </div>
                                   </div>
+                                ) : (
+                                  <p style={{ marginTop: '0.75rem', opacity: 0.8 }}>No source files were attached to this note.</p>
                                 )}
                               </>
                             )

@@ -55,6 +55,17 @@ function Skills() {
     return <div className="page-shell"><div className="card error-box"><p>{error}</p></div></div>
   }
 
+  if (!sortedAreas.length) {
+    return (
+      <div className="page-shell">
+        <div className="card empty-state-box">
+          <h3>No learning areas to display</h3>
+          <p>This track has not published any areas yet.</p>
+        </div>
+      </div>
+    )
+  }
+
   return (
     <div className="page-shell">
       <div className="card page-header-card">

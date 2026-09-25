@@ -1,4 +1,5 @@
 from datetime import date
+from pathlib import Path
 
 from fastapi.testclient import TestClient
 
@@ -14,6 +15,19 @@ def test_upload_service_accepts_common_image_types():
     day = date.today().strftime("%Y-%m-%d")
     assert save_upload("mlops", "diagram.webp", b"image-bytes", FakeClient()) == f"Inbox/mlops/{day}/diagram.webp"
     assert save_upload("mlops", "drawing.gif", b"gif-bytes", FakeClient()) == f"Inbox/mlops/{day}/drawing.gif"
+
+
+def test_upload_service_deduplicates_same_batch_names():
+    class FakeClient:
+        def list_directory(self, _path):
+            return []
+
+    day = date.today().strftime("%Y-%m-%d")
+    first = save_upload("mlops", "duplicate.png", b"img-1", FakeClient(), reserved_names=[])
+    second = save_upload("mlops", "duplicate.png", b"img-2", FakeClient(), reserved_names=[Path(first).name])
+
+    assert first == f"Inbox/mlops/{day}/duplicate.png"
+    assert second == f"Inbox/mlops/{day}/duplicate-2.png"
 
 
 def test_topic_note_endpoint_returns_existing_markdown(monkeypatch):

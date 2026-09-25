@@ -78,9 +78,79 @@ function AddTrack() {
         throw new Error('The pasted value must be a single JSON object for one track.')
       }
 
-      if (!parsed.name || !parsed.areas || !Array.isArray(parsed.areas)) {
-        throw new Error('The top-level JSON object must include a name and an areas array.')
+      if (!parsed.name || typeof parsed.name !== 'string') {
+        throw new Error('The top-level JSON object must include a string name.')
       }
+
+      if (!parsed.areas || !Array.isArray(parsed.areas)) {
+        throw new Error('The top-level JSON object must include an areas array.')
+      }
+
+      const validId = /^[a-z0-9-]+$/
+      const validType = new Set(['Learn', 'Build', 'Review'])
+      const allTopicIds = new Set()
+
+      parsed.areas.forEach((area, areaIndex) => {
+        if (!area || typeof area !== 'object') {
+          throw new Error(`Area at index ${areaIndex} is invalid.`)
+        }
+        if (!area.id || !validId.test(area.id)) {
+          throw new Error(`Area id at index ${areaIndex} must be lowercase and hyphenated.`)
+        }
+        if (!area.name || typeof area.name !== 'string') {
+          throw new Error(`Area name at index ${areaIndex} is required.`)
+        }
+        if (!Array.isArray(area.topics)) {
+          throw new Error(`Area "${area.name}" must include a topics array.`)
+        }
+
+        area.topics.forEach((topic, topicIndex) => {
+          if (!topic || typeof topic !== 'object') {
+            throw new Error(`Topic at area ${area.name} index ${topicIndex} is invalid.`)
+          }
+          if (!topic.id || !validId.test(topic.id)) {
+            throw new Error(`Topic id at area ${area.name} index ${topicIndex} must be lowercase and hyphenated.`)
+          }
+          if (!topic.name || typeof topic.name !== 'string') {
+            throw new Error(`Topic name at area ${area.name} index ${topicIndex} is required.`)
+          }
+          if (!Number.isInteger(topic.week) || topic.week < 1) {
+            throw new Error(`Topic "${topic.name}" must have a week value of 1 or greater.`)
+          }
+          if (!validType.has(topic.type)) {
+            throw new Error(`Topic "${topic.name}" has an invalid type. Use Learn, Build, or Review.`)
+          }
+          if (!Array.isArray(topic.subtopics) || topic.subtopics.some((value) => typeof value !== 'string')) {
+            throw new Error(`Topic "${topic.name}" must include a string array for subtopics.`)
+          }
+          if (!topic.learning_outcome || typeof topic.learning_outcome !== 'string') {
+            throw new Error(`Topic "${topic.name}" must include a learning outcome.`)
+          }
+          if (!topic.project_task || typeof topic.project_task !== 'string') {
+            throw new Error(`Topic "${topic.name}" must include a project task.`)
+          }
+          if (!Array.isArray(topic.depends_on) || topic.depends_on.some((dep) => typeof dep !== 'string')) {
+            throw new Error(`Topic "${topic.name}" must include a string array for depends_on.`)
+          }
+          if (typeof topic.done !== 'boolean') {
+            throw new Error(`Topic "${topic.name}" must have a boolean done value.`)
+          }
+          if (topic.done !== false) {
+            throw new Error(`Topic "${topic.name}" must be created with done set to false.`)
+          }
+
+          allTopicIds.add(topic.id)
+        })
+      })
+
+      parsed.areas.forEach((area) => {
+        area.topics.forEach((topic) => {
+          const invalidDependencies = (topic.depends_on || []).filter((dep) => !allTopicIds.has(dep))
+          if (invalidDependencies.length) {
+            throw new Error(`Topic "${topic.name}" depends on unknown topic ids: ${invalidDependencies.join(', ')}`)
+          }
+        })
+      })
 
       setParsedTrack(parsed)
       setValidationError('')
