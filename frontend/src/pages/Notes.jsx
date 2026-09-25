@@ -1,6 +1,111 @@
-import { useEffect, useState } from 'react'
-import { API_BASE, getFileViewerUrl, getTopicNote, getTrack } from '../api'
+import React, { useEffect, useState } from 'react'
+import { getFileViewerUrl, getTopicNote, getTrack } from '../api'
 import { useTrack } from '../TrackContext'
+
+function formatInlineMarkdown(text = '') {
+  const regex = /(\*\*[^*]+\*\*|`[^`]+`)/g
+  const parts = text.split(regex)
+
+  return parts.map((part, index) => {
+    if (part.startsWith('**') && part.endsWith('**')) {
+      return <strong key={`${part}-${index}`}>{part.slice(2, -2)}</strong>
+    }
+    if (part.startsWith('`') && part.endsWith('`')) {
+      return <code key={`${part}-${index}`} style={{ background: '#1e293b', color: '#f8fafc', padding: '0.1rem 0.35rem', borderRadius: '4px' }}>{part.slice(1, -1)}</code>
+    }
+    return <span key={`${part}-${index}`}>{part}</span>
+  })
+}
+
+function renderMarkdownContent(markdown = '') {
+  const lines = (markdown || '').replace(/\r\n/g, '\n').split('\n')
+  const nodes = []
+  let index = 0
+
+  while (index < lines.length) {
+    const line = lines[index]
+
+    if (!line.trim()) {
+      index += 1
+      continue
+    }
+
+    if (line.startsWith('```')) {
+      const codeLines = []
+      const language = line.replace(/^```/, '').trim()
+      index += 1
+      while (index < lines.length && !lines[index].startsWith('```')) {
+        codeLines.push(lines[index])
+        index += 1
+      }
+      const codeText = codeLines.join('\n')
+      nodes.push(
+        <pre key={`code-${nodes.length}`} style={{ background: '#0f172a', color: '#f8fafc', padding: '0.9rem', borderRadius: '8px', overflowX: 'auto', border: '1px solid #334155', margin: '0.8rem 0' }}>
+          <code>{language ? `${language}\n${codeText}` : codeText}</code>
+        </pre>,
+      )
+      index += 1
+      continue
+    }
+
+    const headingMatch = line.match(/^(#{1,6})\s+(.*)$/)
+    if (headingMatch) {
+      const level = headingMatch[1].length
+      const text = headingMatch[2].trim()
+      const styles = {
+        margin: '0.8rem 0 0.5rem',
+        color: '#ffffff',
+        fontWeight: 700,
+      }
+      const headingTag = `h${Math.min(level, 6)}`
+      nodes.push(
+        React.createElement(
+          headingTag,
+          { key: `heading-${nodes.length}`, style: styles },
+          formatInlineMarkdown(text),
+        ),
+      )
+      index += 1
+      continue
+    }
+
+    if (/^[-*]\s+/.test(line)) {
+      const listItems = []
+      while (index < lines.length && /^[-*]\s+/.test(lines[index])) {
+        listItems.push(lines[index].replace(/^[-*]\s+/, '').trim())
+        index += 1
+      }
+      nodes.push(
+        <ul key={`list-${nodes.length}`} style={{ margin: '0.6rem 0', paddingLeft: '1.2rem', color: '#f8fafc' }}>
+          {listItems.map((item, itemIndex) => (
+            <li key={`${item}-${itemIndex}`} style={{ marginBottom: '0.25rem' }}>{formatInlineMarkdown(item)}</li>
+          ))}
+        </ul>,
+      )
+      continue
+    }
+
+    const paragraph = []
+    while (
+      index < lines.length &&
+      lines[index].trim() &&
+      !lines[index].startsWith('```') &&
+      !/^#{1,6}\s+/.test(lines[index]) &&
+      !/^[-*]\s+/.test(lines[index])
+    ) {
+      paragraph.push(lines[index].trim())
+      index += 1
+    }
+
+    nodes.push(
+      <p key={`para-${nodes.length}`} style={{ margin: '0.5rem 0', lineHeight: 1.7, color: '#ffffff' }}>
+        {formatInlineMarkdown(paragraph.join(' '))}
+      </p>,
+    )
+  }
+
+  return nodes
+}
 
 function Notes() {
   const { trackId, loading: tracksLoading } = useTrack()
@@ -170,9 +275,20 @@ function Notes() {
                             }
                             return (
                               <>
-                                <pre style={{ whiteSpace: 'pre-wrap', marginTop: '0.5rem', background: '#f5f7fb', padding: '0.75rem', borderRadius: '8px' }}>
-                                  {note.content || 'No content saved in this note yet.'}
-                                </pre>
+                                <div
+                                  style={{
+                                    marginTop: '0.75rem',
+                                    background: '#0f172a',
+                                    color: '#ffffff',
+                                    border: '1px solid #334155',
+                                    borderRadius: '10px',
+                                    padding: '1rem',
+                                    overflowX: 'auto',
+                                    boxShadow: 'inset 0 0 0 1px rgba(148, 163, 184, 0.18)',
+                                  }}
+                                >
+                                  {renderMarkdownContent(note.content || 'No content saved in this note yet.')}
+                                </div>
 
                                 {Array.isArray(note.source_files) && note.source_files.length > 0 && (
                                   <div style={{ marginTop: '1rem' }}>
