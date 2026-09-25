@@ -1,4 +1,19 @@
-const API_BASE = import.meta.env.VITE_API_BASE || 'http://127.0.0.1:8000'
+const API_BASE = (() => {
+  const configured = (import.meta.env.VITE_API_BASE || '').trim()
+  if (configured) {
+    return configured.replace(/\/$/, '')
+  }
+
+  if (typeof window !== 'undefined') {
+    const hostname = window.location.hostname
+    const isLocalhost = ['localhost', '127.0.0.1', '0.0.0.0'].includes(hostname) || hostname.endsWith('.local')
+    if (!isLocalhost) {
+      return window.location.origin
+    }
+  }
+
+  return 'http://127.0.0.1:8000'
+})()
 
 async function readJsonResponse(response) {
   const contentType = response.headers.get('content-type') || ''
