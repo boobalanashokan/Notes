@@ -41,6 +41,8 @@ if (process.env.GH_TOKEN && process.env.GH_REPO) {
     get: id => getF('data/uploads/' + id),
     async del(id) { const p = 'data/uploads/' + id, sha = await shaOf(p); if (sha) await fetch(API + p, { method: 'DELETE', headers: H(), body: JSON.stringify({ message: 'remove ' + id, sha, branch: BR }) }); },
   };
+} else if (ON_VERCEL) {
+  throw new Error('Vercel storage is not configured. Set GH_TOKEN and GH_REPO in the Vercel project environment.');
 } else {
   const DIR = path.join(__dirname, 'data'), UP = path.join(DIR, 'uploads'), DB = path.join(DIR, 'db.json');
   fs.mkdirSync(UP, { recursive: true });
