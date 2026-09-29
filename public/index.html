@@ -61,6 +61,8 @@ input[type=checkbox]{width:20px;height:20px;accent-color:var(--acc)}
 document.documentElement.dataset.theme=(()=>{try{return localStorage.theme}catch(e){}})()||(matchMedia('(prefers-color-scheme:dark)').matches?'dark':'light');
 let D={areas:[]}, view='dash', sel=null, q='', opened={}, t, dirty=false;
 let sideHidden=(()=>{try{return localStorage.sideHidden==='1'}catch(e){return false}})();
+const API_BASE=location.hostname.endsWith('.github.io')?'https://notes-domp.vercel.app':'';
+const apiUrl=path=>API_BASE+path;
 const uid=()=>Math.random().toString(36).slice(2,9);
 const $=s=>document.querySelector(s);
 const esc=s=>(s||'').replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
@@ -94,7 +96,7 @@ function norm(){
   });
 }
 async function load(){try{
-  let r=await fetch('/api/data');if(r.status===404)r=await fetch('/seed.json');if(!r.ok)throw new Error('Server replied '+r.status+' (is public/seed.json present?)');
+  let r=await fetch(apiUrl('/api/data'),{credentials:'include'});if(r.status===404)r=await fetch('./seed.json');if(!r.ok)throw new Error('Server replied '+r.status+' (is seed.json present?)');
   const txt=await r.text();try{D=JSON.parse(txt)}catch(e){throw new Error('data/db.json is not valid JSON: '+e.message+'\nStarts with: '+txt.slice(0,80))}
   if(!D||!Array.isArray(D.areas))throw new Error('data file has no "areas" list. Delete data/db.json and reload.');
   base=D.rev||0;try{const dr=JSON.parse(localStorage.draft||'null');if(dr&&Array.isArray(dr.areas)&&(dr.rev||0)>base){D=dr;dirty=true;clearTimeout(t);t=setTimeout(flush,3000)}}catch(e){}
@@ -105,7 +107,7 @@ let base=0;const IDLE=30000;
 function save(){dirty=true;D.rev=Date.now();try{localStorage.draft=JSON.stringify(D)}catch(e){}
   $('#st').textContent='Unsaved · commits to GitHub after 30s idle';clearTimeout(t);t=setTimeout(flush,IDLE)}
 async function flush(force){if(!dirty)return;clearTimeout(t);$('#st').textContent='Saving to GitHub…';
-  try{const r=await fetch('/api/data?base='+base+(force===true?'&force=1':''),{method:'PUT',headers:{'Content-Type':'application/json'},body:JSON.stringify(D)});
+  try{const r=await fetch(apiUrl('/api/data?base='+base+(force===true?'&force=1':'')),{method:'PUT',credentials:'include',headers:{'Content-Type':'application/json'},body:JSON.stringify(D)});
     if(r.status===409){if(confirm("Another device saved newer notes.\nOK = overwrite them with this device's version\nCancel = load the other version"))return flush(true);
       dirty=false;try{localStorage.removeItem('draft')}catch(e){}return load()}
     if(!r.ok)throw new Error(r.status);
@@ -184,8 +186,8 @@ function blockHTML(oid,b){
   let body='';
   if(b.t==='text')body=`<textarea oninput="txtEdit('${oid}','${b.id}',this)" placeholder="Type your notes…">${esc(b.text)}</textarea>`;
   else if(b.t==='ink')body=inkBox(oid,b);
-  else{const u='/files/'+encodeURIComponent(b.file);
-    body=/\.(png|jpe?g|gif|webp)$/i.test(b.file)?`<img src="${u}" loading="lazy" style="max-width:240px;border-radius:8px;cursor:zoom-in;margin-top:6px" onclick="openFile('${b.file}')">`:`<a href="#" onclick="openFile('${b.file}');return false">📄 ${esc(b.name)}</a>`}
+  else{const u=apiUrl('/files/'+encodeURIComponent(b.file));
+    body=/\.(png|jpe?g|gif|webp)$/i.test(b.file)?`<img src="${u}" crossorigin="use-credentials" loading="lazy" style="max-width:240px;border-radius:8px;cursor:zoom-in;margin-top:6px" onclick="openFile('${b.file}')">`:`<a href="#" onclick="openFile('${b.file}');return false">📄 ${esc(b.name)}</a>`}
   return `<div class="blk">${head}${body}</div>`;
 }
 function inkBox(oid,b){const bg=b.ink?.bg||'ruled';
@@ -203,12 +205,12 @@ function addBlock(oid,t){const o=getObj(oid),n=Date.now(),b={id:uid(),t,created:
   if(t==='text'){const a=document.querySelector(`[data-b="${b.id}"] textarea`);a&&a.focus()}}
 function txtEdit(oid,bid,el){const o=getObj(oid),b=B(o).find(x=>x.id===bid);b.text=el.value;b.updated=o.updated=Date.now();save()}
 async function uploadFiles(oid,list){const o=getObj(oid);$('#st').textContent='Uploading…';
-  for(const f of list){const r=await fetch('/api/upload?name='+encodeURIComponent(f.name),{method:'POST',headers:{'Content-Type':'application/octet-stream'},body:f});
+  for(const f of list){const r=await fetch(apiUrl('/api/upload?name='+encodeURIComponent(f.name)),{method:'POST',credentials:'include',headers:{'Content-Type':'application/octet-stream'},body:f});
     if(!r.ok){alert('Upload failed: '+f.name);continue}const j=await r.json(),n=Date.now();
     B(o).push({id:uid(),t:'file',file:j.file,name:f.name,created:n,updated:n});o.updated=n}
   save();renderSide();renderMain();}
 function delBlock(oid,bid){if(!confirm('Delete this block?'))return;const o=getObj(oid),b=B(o).find(x=>x.id===bid);
-  if(b&&b.t==='file')fetch('/api/upload/'+encodeURIComponent(b.file),{method:'DELETE'});
+  if(b&&b.t==='file')fetch(apiUrl('/api/upload/'+encodeURIComponent(b.file)),{method:'DELETE',credentials:'include'});
   o.blocks=B(o).filter(x=>x.id!==bid);save();renderSide();renderMain();}
 function initInk(box){
   const o=B(getObj(box.dataset.oid)).find(b=>b.id===box.dataset.b);o.ink=o.ink||{h:600,strokes:[]};
@@ -251,13 +253,13 @@ function exportJson(){const a=document.createElement('a');a.href=URL.createObjec
 const PDFV='3.11.174',CDN='https://cdnjs.cloudflare.com/ajax/libs/pdf.js/'+PDFV+'/';
 function loadPdfJs(){return window.pdfjsLib?Promise.resolve():new Promise((ok,no)=>{const s=document.createElement('script');s.src=CDN+'pdf.min.js';s.onload=()=>{pdfjsLib.GlobalWorkerOptions.workerSrc=CDN+'pdf.worker.min.js';ok()};s.onerror=()=>no('Could not load PDF reader');document.head.appendChild(s)})}
 function openFile(file){
-  const u='/files/'+encodeURIComponent(file),name=file.replace(/^[^-]+-/,''),img=/\.(png|jpe?g|gif|webp)$/i.test(file);
+  const u=apiUrl('/files/'+encodeURIComponent(file)),name=file.replace(/^[^-]+-/,''),img=/\.(png|jpe?g|gif|webp)$/i.test(file);
   const ov=document.createElement('div');ov.className='ov';
   ov.innerHTML=`<div class="ovb"><b>${esc(name)}</b><button onclick="this.closest('.ov').remove()">✕ Close</button></div><div class="ovc"></div>`;
   document.body.appendChild(ov);const c=ov.querySelector('.ovc');
-  if(img){c.innerHTML=`<img src="${u}" style="max-width:100%;display:block;margin:auto">`;return}
+  if(img){c.innerHTML=`<img src="${u}" crossorigin="use-credentials" style="max-width:100%;display:block;margin:auto">`;return}
   c.textContent='Loading PDF…';
-  loadPdfJs().then(async()=>{const pdf=await pdfjsLib.getDocument(u).promise;c.textContent='';
+  loadPdfJs().then(async()=>{const pdf=await pdfjsLib.getDocument({url:u,withCredentials:true}).promise;c.textContent='';
     for(let i=1;i<=pdf.numPages;i++){const pg=await pdf.getPage(i),w=Math.min(c.clientWidth-16,1100),sc=w/pg.getViewport({scale:1}).width,d=window.devicePixelRatio||1,v=pg.getViewport({scale:sc*d}),cv=document.createElement('canvas');
       cv.width=v.width;cv.height=v.height;cv.style.cssText=`width:${w}px;display:block;margin:8px auto;background:#fff`;c.appendChild(cv);await pg.render({canvasContext:cv.getContext('2d'),viewport:v}).promise}
   }).catch(e=>c.textContent='Could not open PDF: '+e);

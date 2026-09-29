@@ -1,6 +1,20 @@
 const express = require('express'), fs = require('fs'), path = require('path');
 const app = express();
 const ON_VERCEL = !!process.env.VERCEL, LIM = ON_VERCEL ? '4mb' : '50mb';
+const PAGES_ORIGIN = process.env.PAGES_ORIGIN || 'https://boobalanashokan.github.io';
+
+app.use((req, res, next) => {
+  const origin = req.headers.origin;
+  if (origin === PAGES_ORIGIN) {
+    res.set('Access-Control-Allow-Origin', origin);
+    res.set('Access-Control-Allow-Credentials', 'true');
+    res.set('Access-Control-Allow-Headers', 'Authorization, Content-Type');
+    res.set('Access-Control-Allow-Methods', 'GET, PUT, POST, DELETE, OPTIONS');
+    res.vary('Origin');
+  }
+  if (req.method === 'OPTIONS') return origin === PAGES_ORIGIN ? res.sendStatus(204) : res.sendStatus(403);
+  next();
+});
 
 // Optional password (set APP_PASSWORD). Any username works.
 const PASS = process.env.APP_PASSWORD;
