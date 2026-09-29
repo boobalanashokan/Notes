@@ -1,0 +1,143 @@
+<!DOCTYPE html>
+<html lang="en"><head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Learning Notes</title>
+<style>
+:root{--bg:#f6f5f1;--card:#fff;--ink:#1f2328;--mut:#6b7280;--acc:#2f6f5e;--line:#e3e1da}
+@media(prefers-color-scheme:dark){:root{--bg:#16181a;--card:#1f2225;--ink:#e8e6e1;--mut:#9aa0a6;--acc:#5fb59f;--line:#33383c}}
+*{box-sizing:border-box}
+body{margin:0;font:16px/1.5 system-ui,sans-serif;background:var(--bg);color:var(--ink);display:flex;height:100vh}
+#side{width:320px;min-width:260px;overflow:auto;border-right:1px solid var(--line);padding:14px;background:var(--card)}
+#main{flex:1;overflow:auto;padding:22px 28px}
+h1{font-size:18px;margin:0 0 8px}
+.bar{height:6px;background:var(--line);border-radius:4px;overflow:hidden}
+.bar i{display:block;height:100%;background:var(--acc)}
+.mut{color:var(--mut);font-size:13px}
+input[type=search],input.add{width:100%;padding:9px;border:1px solid var(--line);border-radius:8px;background:var(--bg);color:var(--ink);margin:8px 0}
+.area{margin-top:14px;font-weight:600;font-size:14px;display:flex;justify-content:space-between;align-items:center}
+.topic{padding:9px 10px;border-radius:8px;cursor:pointer;margin-top:4px}
+.topic:hover{background:var(--bg)}.topic.sel{background:var(--bg);outline:1px solid var(--acc)}
+button{background:none;border:1px solid var(--line);color:var(--ink);border-radius:8px;padding:5px 10px;cursor:pointer}
+button.pri{background:var(--acc);color:#fff;border-color:var(--acc)}
+.sub{background:var(--card);border:1px solid var(--line);border-radius:10px;padding:10px 12px;margin-top:10px}
+.sub .hd{display:flex;gap:10px;align-items:center}
+.sub .hd b{flex:1;cursor:pointer;font-weight:500}
+.done b{text-decoration:line-through;color:var(--mut)}
+textarea{width:100%;min-height:120px;margin-top:8px;padding:10px;border:1px solid var(--line);border-radius:8px;background:var(--bg);color:var(--ink);font:14px/1.5 ui-monospace,Menlo,monospace;resize:vertical}
+input[type=checkbox]{width:20px;height:20px;accent-color:var(--acc)}
+.ink{margin-top:10px}.ink .tb{display:flex;gap:6px;flex-wrap:wrap;align-items:center;margin-bottom:6px;font-size:13px}
+.ink canvas{width:100%;display:block;background:#fff;border:1px solid var(--line);border-radius:8px;touch-action:none;cursor:crosshair}
+.ink button.on{background:var(--acc);color:#fff;border-color:var(--acc)}
+.dot{display:inline-block;width:14px;height:14px;border-radius:50%;vertical-align:middle}
+#st{position:fixed;right:14px;bottom:10px;font-size:12px;color:var(--mut)}
+@media(max-width:800px){body{flex-direction:column;height:auto}#side{width:100%;max-height:40vh;border-right:0;border-bottom:1px solid var(--line)}}
+</style></head><body>
+<div id="side"></div><div id="main"></div><div id="st"></div>
+<script>
+let D={areas:[]}, sel=null, q='', open={}, t, dirty=false;
+const uid=()=>Math.random().toString(36).slice(2,9);
+const $=s=>document.querySelector(s);
+const esc=s=>(s||'').replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+
+function norm(){D.areas.forEach(a=>a.topics.forEach(tp=>{
+  tp.notes=tp.notes||'';
+  tp.subtopics=(tp.subtopics||[]).map(s=>typeof s==='string'?{id:uid(),name:s,done:false,notes:''}:s);
+}));}
+async function load(){D=await (await fetch('/api/data')).json();norm();if(!sel){const f=D.areas[0]?.topics[0];sel=f?.id}render();}
+function save(){dirty=true;$('#st').textContent='Saving…';clearTimeout(t);t=setTimeout(async()=>{
+  try{await fetch('/api/data',{method:'PUT',headers:{'Content-Type':'application/json'},body:JSON.stringify(D)});dirty=false;$('#st').textContent='Saved ✓'}
+  catch(e){$('#st').textContent='Save failed – retrying';save()}},600);}
+const find=id=>{for(const a of D.areas)for(const tp of a.topics)if(tp.id===id)return{a,tp}};
+const pct=tp=>{const n=tp.subtopics.length;return n?Math.round(100*tp.subtopics.filter(s=>s.done).length/n):(tp.done?100:0)};
+const bar=p=>`<div class="bar"><i style="width:${p}%"></i></div>`;
+
+function render(){
+  const all=D.areas.flatMap(a=>a.topics), subs=all.flatMap(t=>t.subtopics);
+  const overall=subs.length?Math.round(100*subs.filter(s=>s.done).length/subs.length):0;
+  const doneT=all.filter(t=>t.done).length;
+  let h=`<h1>📚 Learning Notes</h1>${bar(overall)}<div class="mut">${overall}% subtopics · ${doneT}/${all.length} topics done</div>
+  <input type="search" placeholder="Search topics & notes…" value="${esc(q)}" oninput="q=this.value;renderSide()">`;
+  $('#side').innerHTML=h+'<div id="tree"></div><input class="add" id="na" placeholder="+ New area (Enter)" onkeydown="if(event.key==\'Enter\')addArea(this)">';
+  renderSide();renderMain();
+}
+function renderSide(){
+  const ql=q.toLowerCase();let h='';
+  D.areas.forEach(a=>{
+    const ts=a.topics.filter(tp=>!ql||(tp.name+tp.notes+tp.subtopics.map(s=>s.name+s.notes).join()).toLowerCase().includes(ql));
+    if(!ts.length&&ql)return;
+    h+=`<div class="area"><span>${esc(a.name)}</span><span><button onclick="addTopic('${a.id}')">+</button> <button onclick="renameArea('${a.id}')">✎</button></span></div>`;
+    ts.forEach(tp=>h+=`<div class="topic ${tp.id===sel?'sel':''}" onclick="sel='${tp.id}';render()">${tp.done?'✅ ':''}${esc(tp.name)}<div class="mut">${tp.week?'Wk '+tp.week+' · ':''}${pct(tp)}%</div>${bar(pct(tp))}</div>`);
+  });
+  $('#tree').innerHTML=h;
+}
+function renderMain(){
+  const f=find(sel);if(!f){$('#main').innerHTML='<p class="mut">Select or add a topic.</p>';return}
+  const tp=f.tp;
+  let h=`<div style="display:flex;gap:10px;align-items:center;flex-wrap:wrap"><h1 style="font-size:24px;margin:0;flex:1">${esc(tp.name)}</h1>
+   <label><input type="checkbox" ${tp.done?'checked':''} onchange="tp_('done',this.checked)"> Topic done</label>
+   <button onclick="renameTopic()">Rename</button><button onclick="delTopic()">Delete</button></div>
+   <div class="mut">${esc(f.a.name)} ${tp.week?'· Week '+tp.week:''} ${tp.type?'· '+tp.type:''}</div>${bar(pct(tp))}`;
+  if(tp.learning_outcome)h+=`<p><b>Outcome:</b> ${esc(tp.learning_outcome)}</p>`;
+  if(tp.project_task)h+=`<p><b>Project:</b> ${esc(tp.project_task)}</p>`;
+  h+=`<h3>Topic notes</h3><textarea oninput="tp_('notes',this.value,1)" placeholder="General notes, links, code…">${esc(tp.notes)}</textarea>${inkBox(tp.id)}<h3>Subtopics</h3>`;
+  tp.subtopics.forEach(s=>h+=`<div class="sub ${s.done?'done':''}"><div class="hd">
+   <input type="checkbox" ${s.done?'checked':''} onchange="sub('${s.id}','done',this.checked)">
+   <b onclick="open['${s.id}']=!open['${s.id}'];renderMain()">${esc(s.name)} ${s.notes||s.ink?.strokes?.length?'📝':''}</b>
+   <button onclick="renameSub('${s.id}')">✎</button><button onclick="delSub('${s.id}')">🗑</button></div>
+   ${open[s.id]?`<textarea oninput="sub('${s.id}','notes',this.value,1)" placeholder="Type your notes…">${esc(s.notes)}</textarea>${inkBox(s.id)}`:''}</div>`);
+  h+=`<input class="add" placeholder="+ New subtopic (Enter)" onkeydown="if(event.key=='Enter')addSub(this)">`;
+  $('#main').innerHTML=h;
+  document.querySelectorAll('.ink').forEach(initInk);
+}
+function tp_(k,v,quiet){find(sel).tp[k]=v;save();if(!quiet)render()}
+function sub(id,k,v,quiet){find(sel).tp.subtopics.find(s=>s.id===id)[k]=v;save();if(!quiet){renderSide();renderMain()}}
+function addArea(i){if(!i.value.trim())return;D.areas.push({id:uid(),name:i.value.trim(),topics:[]});save();render()}
+function addTopic(aid){const n=prompt('Topic name?');if(!n)return;const tp={id:uid(),name:n,type:'Learn',done:false,notes:'',subtopics:[]};D.areas.find(a=>a.id===aid).topics.push(tp);sel=tp.id;save();render()}
+function addSub(i){if(!i.value.trim())return;find(sel).tp.subtopics.push({id:uid(),name:i.value.trim(),done:false,notes:''});save();render()}
+function renameArea(id){const a=D.areas.find(a=>a.id===id),n=prompt('Rename area (empty = delete)',a.name);if(n===null)return;if(!n.trim()){if(confirm('Delete area and all topics?'))D.areas=D.areas.filter(x=>x!==a)}else a.name=n;save();render()}
+function renameTopic(){const tp=find(sel).tp,n=prompt('Rename',tp.name);if(n){tp.name=n;save();render()}}
+function delTopic(){if(!confirm('Delete this topic and its notes?'))return;const f=find(sel);f.a.topics=f.a.topics.filter(x=>x!==f.tp);sel=null;save();render()}
+function renameSub(id){const s=find(sel).tp.subtopics.find(s=>s.id===id),n=prompt('Rename',s.name);if(n){s.name=n;save();render()}}
+function delSub(id){if(!confirm('Delete subtopic and its notes?'))return;const tp=find(sel).tp;tp.subtopics=tp.subtopics.filter(s=>s.id!==id);save();render()}
+// ---------- Handwriting ----------
+const T={tool:'pen',color:'#111827',penOnly:true};
+const COLORS=['#111827','#1d4ed8','#dc2626','#15803d'];
+function inkBox(oid){
+  return `<div class="ink" data-oid="${oid}"><div class="mut">✍️ Handwriting</div><div class="tb">
+   ${COLORS.map(c=>`<button data-c="${c}"><span class="dot" style="background:${c}"></span></button>`).join('')}
+   <button data-t="eraser">Eraser</button><button data-a="undo">Undo</button><button data-a="clear">Clear</button><button data-a="more">+ Space</button>
+   <label><input type="checkbox" data-a="penonly" ${T.penOnly?'checked':''}> Pen only</label></div><canvas></canvas></div>`;
+}
+function getObj(oid){const tp=find(sel).tp;return tp.id===oid?tp:tp.subtopics.find(s=>s.id===oid)}
+function initInk(box){
+  const o=getObj(box.dataset.oid);o.ink=o.ink||{h:600,strokes:[]};
+  const cv=box.querySelector('canvas'),ctx=cv.getContext('2d'),W=1000,S=2;let cur=null;
+  const size=()=>{cv.width=W*S;cv.height=o.ink.h*S;cv.style.aspectRatio=W+'/'+o.ink.h};
+  const seg=(s,i)=>{const a=s.pts[i-1],b=s.pts[i];ctx.strokeStyle=s.c;ctx.lineWidth=2.2*(0.4+b[2]);ctx.beginPath();ctx.moveTo(a[0],a[1]);ctx.lineTo(b[0],b[1]);ctx.stroke()};
+  const draw=()=>{ctx.setTransform(S,0,0,S,0,0);ctx.clearRect(0,0,W,o.ink.h);ctx.lineCap=ctx.lineJoin='round';
+    ctx.strokeStyle='#e5e7eb';ctx.lineWidth=1;for(let y=40;y<o.ink.h;y+=40){ctx.beginPath();ctx.moveTo(0,y);ctx.lineTo(W,y);ctx.stroke()}
+    o.ink.strokes.forEach(s=>{if(s.pts.length==1){ctx.fillStyle=s.c;ctx.beginPath();ctx.arc(s.pts[0][0],s.pts[0][1],1.5,0,7);ctx.fill()}for(let i=1;i<s.pts.length;i++)seg(s,i)})};
+  const pos=e=>{const r=cv.getBoundingClientRect();return[(e.clientX-r.left)*W/r.width,(e.clientY-r.top)*o.ink.h/r.height,e.pointerType==='pen'||e.pressure>0&&e.pressure!==0.5?e.pressure:0.5]};
+  const erase=p=>{const n=o.ink.strokes.length;o.ink.strokes=o.ink.strokes.filter(s=>!s.pts.some(q=>Math.hypot(q[0]-p[0],q[1]-p[1])<14));if(o.ink.strokes.length!==n)draw()};
+  const marks=()=>box.querySelectorAll('[data-c]').forEach(b=>b.classList.toggle('on',T.tool==='pen'&&b.dataset.c===T.color));
+  box.querySelector('[data-t]').classList.toggle('on',T.tool==='eraser');marks();
+  cv.onpointerdown=e=>{if(T.penOnly&&e.pointerType==='touch')return;e.preventDefault();cv.setPointerCapture(e.pointerId);
+    const p=pos(e);if(T.tool==='eraser'){cur='e';erase(p);return}
+    cur={c:T.color,pts:[p]};o.ink.strokes.push(cur);draw()};
+  cv.onpointermove=e=>{if(!cur)return;const evs=e.getCoalescedEvents?e.getCoalescedEvents():[e];
+    for(const ev of evs){const p=pos(ev);if(cur==='e')erase(p);else{cur.pts.push(p);seg(cur,cur.pts.length-1)}}};
+  cv.onpointerup=cv.onpointercancel=()=>{if(cur){cur=null;save();renderSide()}};
+  box.onclick=e=>{const b=e.target.closest('button,input');if(!b)return;
+    if(b.dataset.c){T.color=b.dataset.c;T.tool='pen';box.querySelector('[data-t]').classList.remove('on');marks()}
+    else if(b.dataset.t){T.tool=T.tool==='eraser'?'pen':'eraser';b.classList.toggle('on',T.tool==='eraser');marks()}
+    else if(b.dataset.a==='undo'){o.ink.strokes.pop();draw();save()}
+    else if(b.dataset.a==='clear'){if(confirm('Clear all handwriting here?')){o.ink.strokes=[];draw();save()}}
+    else if(b.dataset.a==='more'){o.ink.h+=400;size();draw();save()}
+    else if(b.dataset.a==='penonly')T.penOnly=b.checked};
+  size();draw();
+}
+// pick up edits made on the other device
+window.addEventListener('focus',()=>{if(!dirty&&document.activeElement.tagName!=='TEXTAREA')load()});
+load();
+</script></body></html>

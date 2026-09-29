@@ -1,0 +1,11 @@
+{
+  "id": "probability-foundations",
+  "name": "Probability Foundations",
+  "week": 1,
+  "type": "Learn",
+  "done": false,
+  "notes": "",
+  "subtopics": [
+    { "id": "a1b2", "name": "Conditional probability and Bayes", "done": false, "notes": "P(A|B) = ..." }
+  ]
+}

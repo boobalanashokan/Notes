@@ -1,8 +1,2 @@
-.env
-.env.*
-!.env.example
-.venv/
-venv/
-backend/.venv/
-__pycache__/
-*.pyc
+node_modules/
+data/db.json.tmp
