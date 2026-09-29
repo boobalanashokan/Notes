@@ -1,7 +1,0 @@
-{
-  "name": "learning-notes",
-  "version": "1.2.0",
-  "main": "server.js",
-  "scripts": { "start": "node --env-file-if-exists=.env server.js" },
-  "dependencies": { "express": "^4.19.2" }
-}

@@ -61,11 +61,66 @@ input[type=checkbox]{width:20px;height:20px;accent-color:var(--acc)}
 document.documentElement.dataset.theme=(()=>{try{return localStorage.theme}catch(e){}})()||(matchMedia('(prefers-color-scheme:dark)').matches?'dark':'light');
 let D={areas:[]}, view='dash', sel=null, q='', opened={}, t, dirty=false;
 let sideHidden=(()=>{try{return localStorage.sideHidden==='1'}catch(e){return false}})();
-const API_BASE=location.hostname.endsWith('.github.io')?'https://notes-domp.vercel.app':'';
-const apiUrl=path=>API_BASE+path;
+let GH_TOKEN='', dbSha=null;
+const GH_BRANCH='new', GH_CONTENTS='https://api.github.com/repos/boobalanashokan/Notes/contents/';
+const attachmentUrls=new Map();
 const uid=()=>Math.random().toString(36).slice(2,9);
 const $=s=>document.querySelector(s);
 const esc=s=>(s||'').replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+
+function contentUrl(path){return GH_CONTENTS+path.split('/').map(encodeURIComponent).join('/')+'?ref='+encodeURIComponent(GH_BRANCH)}
+async function githubRequest(path,options={}){
+  const headers=new Headers(options.headers||{});
+  headers.set('Accept','application/vnd.github+json');
+  headers.set('Authorization','Bearer '+GH_TOKEN);
+  headers.set('X-GitHub-Api-Version','2022-11-28');
+  return fetch(contentUrl(path),{...options,headers});
+}
+async function githubError(response){
+  let message='';try{message=(await response.json()).message||''}catch(e){}
+  return new Error('GitHub API '+response.status+(message?': '+message:''));
+}
+function decodeBase64(value){
+  const binary=atob(value.replace(/\s/g,'')),bytes=Uint8Array.from(binary,c=>c.charCodeAt(0));
+  return new TextDecoder().decode(bytes);
+}
+function encodeBase64(bytes){
+  const array=bytes instanceof Uint8Array?bytes:new Uint8Array(bytes);let binary='';
+  for(let i=0;i<array.length;i+=0x8000)binary+=String.fromCharCode(...array.subarray(i,i+0x8000));
+  return btoa(binary);
+}
+async function readRepoFile(path){
+  const file=await readRepoMetadata(path);
+  if(!file)return null;
+  if(typeof file.content!=='string')throw new Error('GitHub did not return file contents for '+path);
+  return{sha:file.sha,text:decodeBase64(file.content)};
+}
+async function readRepoMetadata(path){
+  const response=await githubRequest(path);
+  if(response.status===404)return null;
+  if(!response.ok)throw await githubError(response);
+  return response.json();
+}
+async function writeRepoFile(path,content,message,sha){
+  const response=await githubRequest(path,{method:'PUT',headers:{'Content-Type':'application/json'},body:JSON.stringify({message,content,branch:GH_BRANCH,...(sha?{sha}:{})})});
+  if(!response.ok)throw await githubError(response);
+  return response.json();
+}
+async function deleteRepoFile(path,sha,message){
+  const response=await githubRequest(path,{method:'DELETE',headers:{'Content-Type':'application/json'},body:JSON.stringify({message,sha,branch:GH_BRANCH})});
+  if(!response.ok)throw await githubError(response);
+}
+function showConnect(message=''){
+  $('#side').innerHTML='<h1>📚 Learning Notes</h1>';
+  $('#main').innerHTML=`<div class="card" style="max-width:560px;margin:8vh auto"><h1>Connect GitHub</h1><p class="mut">Use a fine-grained token with Contents read/write access to boobalanashokan/Notes.</p><p><a href="https://github.com/settings/personal-access-tokens/new" target="_blank" rel="noopener noreferrer">Create a GitHub token</a></p><form onsubmit="connectGitHub(event)"><label for="ghToken">GitHub token</label><input id="ghToken" type="password" autocomplete="off" required style="display:block;width:100%;padding:10px;margin:8px 0"><button class="pri" type="submit">Connect</button></form><p class="mut">The token stays in this tab's memory and is cleared when you close the tab.</p>${message?`<p role="alert">${esc(message)}</p>`:''}</div>`;
+}
+async function connectGitHub(event){
+  event.preventDefault();GH_TOKEN=$('#ghToken').value.trim();$('#ghToken').value='';await load();
+}
+function disconnectGitHub(){
+  if(dirty&&!confirm('Disconnect and discard unsaved changes?'))return;
+  clearTimeout(t);GH_TOKEN='';dbSha=null;dirty=false;D={areas:[]};showConnect();
+}
 
 function syncSide(){
   document.body.classList.toggle('side-hidden',sideHidden);
@@ -95,24 +150,26 @@ function norm(){
     });
   });
 }
-async function load(){try{
-  let r=await fetch(apiUrl('/api/data'),{credentials:'include'});if(r.status===404)r=await fetch('./seed.json');if(!r.ok)throw new Error('Server replied '+r.status+' (is seed.json present?)');
-  const txt=await r.text();try{D=JSON.parse(txt)}catch(e){throw new Error('data/db.json is not valid JSON: '+e.message+'\nStarts with: '+txt.slice(0,80))}
+async function load(){if(!GH_TOKEN){showConnect();return}try{
+  const stored=await readRepoFile('data/db.json');let txt;
+  if(stored){txt=stored.text;dbSha=stored.sha}
+  else{const r=await fetch('./seed.json');if(!r.ok)throw new Error('Could not load seed.json ('+r.status+')');txt=await r.text();dbSha=null}
+  try{D=JSON.parse(txt)}catch(e){throw new Error('data/db.json is not valid JSON: '+e.message+'\nStarts with: '+txt.slice(0,80))}
   if(!D||!Array.isArray(D.areas))throw new Error('data file has no "areas" list. Delete data/db.json and reload.');
   base=D.rev||0;try{const dr=JSON.parse(localStorage.draft||'null');if(dr&&Array.isArray(dr.areas)&&(dr.rev||0)>base){D=dr;dirty=true;clearTimeout(t);t=setTimeout(flush,3000)}}catch(e){}
   norm();
   if(!sel){const f=D.areas[0]?.topics[0];sel=f?.id}render();
-}catch(e){$('#side').innerHTML='<h1>📚 Learning Notes</h1>';$('#main').innerHTML='<h2>Could not load</h2><pre style="white-space:pre-wrap">'+esc(String(e))+'</pre>'}}
+}catch(e){$('#side').innerHTML='<h1>📚 Learning Notes</h1>';$('#main').innerHTML=`<div class="card"><h2>Could not load</h2><pre style="white-space:pre-wrap">${esc(String(e))}</pre><button onclick="load()">Retry</button> <button onclick="disconnectGitHub()">Change token</button></div>`}}
 let base=0;const IDLE=30000;
 function save(){dirty=true;D.rev=Date.now();try{localStorage.draft=JSON.stringify(D)}catch(e){}
   $('#st').textContent='Unsaved · commits to GitHub after 30s idle';clearTimeout(t);t=setTimeout(flush,IDLE)}
 async function flush(force){if(!dirty)return;clearTimeout(t);$('#st').textContent='Saving to GitHub…';
-  try{const r=await fetch(apiUrl('/api/data?base='+base+(force===true?'&force=1':'')),{method:'PUT',credentials:'include',headers:{'Content-Type':'application/json'},body:JSON.stringify(D)});
-    if(r.status===409){if(confirm("Another device saved newer notes.\nOK = overwrite them with this device's version\nCancel = load the other version"))return flush(true);
+  try{const remote=await readRepoFile('data/db.json'),remoteRev=remote?(JSON.parse(remote.text).rev||0):0;
+    if(remote&&!force&&remoteRev!==base){if(confirm("Another device saved newer notes.\nOK = overwrite them with this device's version\nCancel = load the other version"))return flush(true);
       dirty=false;try{localStorage.removeItem('draft')}catch(e){}return load()}
-    if(!r.ok)throw new Error(r.status);
-    base=D.rev;dirty=false;try{localStorage.removeItem('draft')}catch(e){}$('#st').textContent='Saved to GitHub ✓ '+new Date().toLocaleTimeString()}
-  catch(e){$('#st').textContent='Save failed, retrying…';t=setTimeout(flush,10000)}}
+    const result=await writeRepoFile('data/db.json',encodeBase64(new TextEncoder().encode(JSON.stringify(D))),'notes: session save '+new Date().toISOString(),remote?.sha);
+    dbSha=result.content?.sha||dbSha;base=D.rev;dirty=false;try{localStorage.removeItem('draft')}catch(e){}$('#st').textContent='Saved to GitHub ✓ '+new Date().toLocaleTimeString()}
+  catch(e){console.error(e);$('#st').textContent='Save failed: '+e.message;t=setTimeout(flush,10000)}}
 document.addEventListener('visibilitychange',()=>{if(document.hidden)flush()});addEventListener('pagehide',()=>flush());
 const find=id=>{for(const a of D.areas)for(const tp of a.topics)if(tp.id===id)return{a,tp}};
 const pct=tp=>{const n=tp.subtopics.length;return n?Math.round(100*tp.subtopics.filter(s=>s.done).length/n):(tp.done?100:0)};
@@ -122,7 +179,7 @@ function render(){
   const all=D.areas.flatMap(a=>a.topics), subs=all.flatMap(t=>t.subtopics);
   const overall=subs.length?Math.round(100*subs.filter(s=>s.done).length/subs.length):0;
   const doneT=all.filter(t=>t.done).length;
-  let h=`<div class="side-head"><h1>📚 Learning Notes</h1><div><button onclick="toggleTheme()" title="Light / dark" aria-label="Toggle theme">🌓</button><button onclick="toggleSide()" title="Hide sidebar" aria-label="Hide sidebar">‹</button></div></div><div style="display:flex;gap:6px;margin:8px 0"><button class="pri" style="flex:1" onclick="view='dash';render()">📊 Dashboard</button><button onclick="flush()">💾 Save</button></div>${bar(overall)}<div class="mut">${overall}% subtopics · ${doneT}/${all.length} topics done</div>
+  let h=`<div class="side-head"><h1>📚 Learning Notes</h1><div><button onclick="toggleTheme()" title="Light / dark" aria-label="Toggle theme">🌓</button><button onclick="disconnectGitHub()" title="Disconnect GitHub" aria-label="Disconnect GitHub">↪</button><button onclick="toggleSide()" title="Hide sidebar" aria-label="Hide sidebar">‹</button></div></div><div style="display:flex;gap:6px;margin:8px 0"><button class="pri" style="flex:1" onclick="view='dash';render()">📊 Dashboard</button><button onclick="flush()">💾 Save</button></div>${bar(overall)}<div class="mut">${overall}% subtopics · ${doneT}/${all.length} topics done</div>
   <input type="search" placeholder="Search topics & notes…" value="${esc(q)}" oninput="q=this.value;renderSide()">`;
   $('#side').innerHTML=h+'<div id="tree"></div><input class="add" id="na" placeholder="+ New area (Enter)" onkeydown="if(event.key==\'Enter\')addArea(this)">';
   renderSide();renderMain();
@@ -155,6 +212,7 @@ function renderMain(){if(view==='dash')return renderDash();
   h+=`<input class="add" placeholder="+ New subtopic (Enter)" onkeydown="if(event.key=='Enter')addSub(this)">`;
   $('#main').innerHTML=h;
   document.querySelectorAll('.ink').forEach(initInk);
+  hydrateAttachmentPreviews();
 }
 function tp_(k,v,quiet){const X=find(sel).tp;X[k]=v;X.updated=Date.now();save();if(!quiet)render()}
 function sub(id,k,v,quiet){const X=find(sel).tp.subtopics.find(s=>s.id===id);X[k]=v;X.updated=Date.now();save();if(!quiet){renderSide();renderMain()}}
@@ -186,8 +244,7 @@ function blockHTML(oid,b){
   let body='';
   if(b.t==='text')body=`<textarea oninput="txtEdit('${oid}','${b.id}',this)" placeholder="Type your notes…">${esc(b.text)}</textarea>`;
   else if(b.t==='ink')body=inkBox(oid,b);
-  else{const u=apiUrl('/files/'+encodeURIComponent(b.file));
-    body=/\.(png|jpe?g|gif|webp)$/i.test(b.file)?`<img src="${u}" crossorigin="use-credentials" loading="lazy" style="max-width:240px;border-radius:8px;cursor:zoom-in;margin-top:6px" onclick="openFile('${b.file}')">`:`<a href="#" onclick="openFile('${b.file}');return false">📄 ${esc(b.name)}</a>`}
+  else{body=/\.(png|jpe?g|gif|webp)$/i.test(b.file)?`<img data-file="${esc(b.file)}" alt="Loading attachment" loading="lazy" style="max-width:240px;border-radius:8px;cursor:zoom-in;margin-top:6px" onclick="openFile('${b.file}')">`:`<a href="#" onclick="openFile('${b.file}');return false">📄 ${esc(b.name)}</a>`}
   return `<div class="blk">${head}${body}</div>`;
 }
 function inkBox(oid,b){const bg=b.ink?.bg||'ruled';
@@ -204,13 +261,34 @@ function addBlock(oid,t){const o=getObj(oid),n=Date.now(),b={id:uid(),t,created:
   B(o).push(b);o.updated=n;save();renderSide();renderMain();
   if(t==='text'){const a=document.querySelector(`[data-b="${b.id}"] textarea`);a&&a.focus()}}
 function txtEdit(oid,bid,el){const o=getObj(oid),b=B(o).find(x=>x.id===bid);b.text=el.value;b.updated=o.updated=Date.now();save()}
-async function uploadFiles(oid,list){const o=getObj(oid);$('#st').textContent='Uploading…';
-  for(const f of list){const r=await fetch(apiUrl('/api/upload?name='+encodeURIComponent(f.name)),{method:'POST',credentials:'include',headers:{'Content-Type':'application/octet-stream'},body:f});
-    if(!r.ok){alert('Upload failed: '+f.name);continue}const j=await r.json(),n=Date.now();
-    B(o).push({id:uid(),t:'file',file:j.file,name:f.name,created:n,updated:n});o.updated=n}
+async function uploadFiles(oid,list){const o=getObj(oid);$('#st').textContent='Uploading to GitHub…';
+  for(const f of list){
+    if(f.size>20*1024*1024){alert('Upload failed: '+f.name+' exceeds the 20 MB limit.');continue}
+    const name=String(f.name).replace(/[^\w.\-]+/g,'_').slice(-80),file=Date.now().toString(36)+'-'+name;
+    try{await writeRepoFile('data/uploads/'+file,encodeBase64(await f.arrayBuffer()),'attach: '+file);attachmentUrls.set(file,URL.createObjectURL(f));
+      const n=Date.now();B(o).push({id:uid(),t:'file',file,name:f.name,created:n,updated:n});o.updated=n}
+    catch(e){alert('Upload failed: '+f.name+'\n'+e.message)}
+  }
   save();renderSide();renderMain();}
+async function attachmentUrl(file){
+  if(attachmentUrls.has(file))return attachmentUrls.get(file);
+  const response=await githubRequest('data/uploads/'+file,{headers:{Accept:'application/vnd.github.raw+json'}});
+  if(!response.ok)throw await githubError(response);
+  const url=URL.createObjectURL(await response.blob());attachmentUrls.set(file,url);return url;
+}
+function hydrateAttachmentPreviews(){
+  document.querySelectorAll('img[data-file]').forEach(async image=>{
+    try{image.src=await attachmentUrl(image.dataset.file);image.alt=image.dataset.file}
+    catch(e){image.alt='Attachment unavailable'}
+  });
+}
+async function removeAttachment(file){
+  try{const item=await readRepoMetadata('data/uploads/'+file);if(item)await deleteRepoFile('data/uploads/'+file,item.sha,'remove '+file);
+    const url=attachmentUrls.get(file);if(url)URL.revokeObjectURL(url);attachmentUrls.delete(file)}
+  catch(e){console.error(e);$('#st').textContent='Attachment delete failed: '+e.message}
+}
 function delBlock(oid,bid){if(!confirm('Delete this block?'))return;const o=getObj(oid),b=B(o).find(x=>x.id===bid);
-  if(b&&b.t==='file')fetch(apiUrl('/api/upload/'+encodeURIComponent(b.file)),{method:'DELETE',credentials:'include'});
+  if(b&&b.t==='file')removeAttachment(b.file);
   o.blocks=B(o).filter(x=>x.id!==bid);save();renderSide();renderMain();}
 function initInk(box){
   const o=B(getObj(box.dataset.oid)).find(b=>b.id===box.dataset.b);o.ink=o.ink||{h:600,strokes:[]};
@@ -250,19 +328,14 @@ function initInk(box){
 function go(id){sel=id;view='topic';render()}
 function toggleTheme(){const d=document.documentElement,n=dk()?'light':'dark';d.dataset.theme=n;try{localStorage.theme=n}catch(e){}render()}
 function exportJson(){const a=document.createElement('a');a.href=URL.createObjectURL(new Blob([JSON.stringify(D)],{type:'application/json'}));a.download='notes-backup.json';a.click()}
-const PDFV='3.11.174',CDN='https://cdnjs.cloudflare.com/ajax/libs/pdf.js/'+PDFV+'/';
-function loadPdfJs(){return window.pdfjsLib?Promise.resolve():new Promise((ok,no)=>{const s=document.createElement('script');s.src=CDN+'pdf.min.js';s.onload=()=>{pdfjsLib.GlobalWorkerOptions.workerSrc=CDN+'pdf.worker.min.js';ok()};s.onerror=()=>no('Could not load PDF reader');document.head.appendChild(s)})}
-function openFile(file){
-  const u=apiUrl('/files/'+encodeURIComponent(file)),name=file.replace(/^[^-]+-/,''),img=/\.(png|jpe?g|gif|webp)$/i.test(file);
+async function openFile(file){
+  const name=file.replace(/^[^-]+-/,''),img=/\.(png|jpe?g|gif|webp)$/i.test(file);
   const ov=document.createElement('div');ov.className='ov';
-  ov.innerHTML=`<div class="ovb"><b>${esc(name)}</b><button onclick="this.closest('.ov').remove()">✕ Close</button></div><div class="ovc"></div>`;
+  ov.innerHTML=`<div class="ovb"><b>${esc(name)}</b><button onclick="this.closest('.ov').remove()">✕ Close</button></div><div class="ovc">Loading file…</div>`;
   document.body.appendChild(ov);const c=ov.querySelector('.ovc');
-  if(img){c.innerHTML=`<img src="${u}" crossorigin="use-credentials" style="max-width:100%;display:block;margin:auto">`;return}
-  c.textContent='Loading PDF…';
-  loadPdfJs().then(async()=>{const pdf=await pdfjsLib.getDocument({url:u,withCredentials:true}).promise;c.textContent='';
-    for(let i=1;i<=pdf.numPages;i++){const pg=await pdf.getPage(i),w=Math.min(c.clientWidth-16,1100),sc=w/pg.getViewport({scale:1}).width,d=window.devicePixelRatio||1,v=pg.getViewport({scale:sc*d}),cv=document.createElement('canvas');
-      cv.width=v.width;cv.height=v.height;cv.style.cssText=`width:${w}px;display:block;margin:8px auto;background:#fff`;c.appendChild(cv);await pg.render({canvasContext:cv.getContext('2d'),viewport:v}).promise}
-  }).catch(e=>c.textContent='Could not open PDF: '+e);
+  try{const url=await attachmentUrl(file);if(img){const image=document.createElement('img');image.src=url;image.alt=name;image.style.cssText='max-width:100%;display:block;margin:auto';c.replaceChildren(image)}
+    else{const frame=document.createElement('iframe');frame.src=url;frame.title=name;frame.style.cssText='width:100%;height:100%;min-height:70vh;border:0;background:#fff';c.replaceChildren(frame)}}
+  catch(e){c.textContent='Could not open file: '+e.message}
 }
 function ring(p,z=120,w=12){const r=(z-w)/2,c=2*Math.PI*r,m=z/2;
   return `<svg width="${z}" height="${z}" viewBox="0 0 ${z} ${z}"><circle cx="${m}" cy="${m}" r="${r}" fill="none" stroke="var(--line)" stroke-width="${w}"/><circle cx="${m}" cy="${m}" r="${r}" fill="none" stroke="var(--acc)" stroke-width="${w}" stroke-linecap="round" stroke-dasharray="${c*p/100} ${c}" transform="rotate(-90 ${m} ${m})"/><text x="50%" y="50%" text-anchor="middle" dominant-baseline="central" fill="var(--ink)" font-size="${z/4.2}" font-weight="700">${p}%</text></svg>`}
