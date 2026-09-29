@@ -4,12 +4,19 @@
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Learning Notes</title>
 <style>
-:root{--bg:#f6f5f1;--card:#fff;--ink:#1f2328;--mut:#6b7280;--acc:#2f6f5e;--line:#e3e1da}
-@media(prefers-color-scheme:dark){:root{--bg:#16181a;--card:#1f2225;--ink:#e8e6e1;--mut:#9aa0a6;--acc:#5fb59f;--line:#33383c}}
+:root{--bg:#f6f5f1;--card:#fff;--ink:#1f2328;--mut:#6b7280;--acc:#2f6f5e;--line:#e3e1da;--pad:#fff}
+:root[data-theme=dark]{--bg:#16181a;--card:#1f2225;--ink:#e8e6e1;--mut:#9aa0a6;--acc:#5fb59f;--line:#33383c;--pad:#0b0c0d}
 *{box-sizing:border-box}
 body{margin:0;font:16px/1.5 system-ui,sans-serif;background:var(--bg);color:var(--ink);display:flex;height:100vh}
 #side{width:320px;min-width:260px;overflow:auto;border-right:1px solid var(--line);padding:14px;background:var(--card)}
-#main{flex:1;overflow:auto;padding:22px 28px}
+#main{flex:1;min-width:0;overflow:auto;padding:22px 28px}
+body.side-hidden #side{display:none}
+body.side-hidden #main{padding-top:58px}
+#sideReveal{display:none;position:fixed;z-index:20;top:12px;left:10px;background:var(--card)}
+body.side-hidden #sideReveal{display:block}
+.side-head{display:flex;justify-content:space-between;align-items:center;gap:8px}
+.side-head h1{margin:0}
+.side-head div{display:flex;gap:5px}
 h1{font-size:18px;margin:0 0 8px}
 .bar{height:6px;background:var(--line);border-radius:4px;overflow:hidden}
 .bar i{display:block;height:100%;background:var(--acc)}
@@ -27,27 +34,75 @@ button.pri{background:var(--acc);color:#fff;border-color:var(--acc)}
 textarea{width:100%;min-height:120px;margin-top:8px;padding:10px;border:1px solid var(--line);border-radius:8px;background:var(--bg);color:var(--ink);font:14px/1.5 ui-monospace,Menlo,monospace;resize:vertical}
 input[type=checkbox]{width:20px;height:20px;accent-color:var(--acc)}
 .ink{margin-top:10px}.ink .tb{display:flex;gap:6px;flex-wrap:wrap;align-items:center;margin-bottom:6px;font-size:13px}
-.ink canvas{width:100%;display:block;background:#fff;border:1px solid var(--line);border-radius:8px;touch-action:none;cursor:crosshair}
+.ink canvas{width:100%;display:block;background:var(--pad);border:1px solid var(--line);border-radius:8px;touch-action:none;cursor:crosshair}
 .ink button.on{background:var(--acc);color:#fff;border-color:var(--acc)}
 .dot{display:inline-block;width:14px;height:14px;border-radius:50%;vertical-align:middle}
+.att{margin-top:14px}.att input{margin:6px 0}.fl{display:inline-block;margin:6px 10px 0 0;vertical-align:top}.fl img{max-width:240px;border:1px solid var(--line);border-radius:8px;display:block}
+.kpis{display:grid;grid-template-columns:repeat(auto-fit,minmax(130px,1fr));gap:10px;margin:14px 0}.kpi{background:var(--card);border:1px solid var(--line);border-radius:10px;padding:12px}.kpi b{display:block;font-size:24px}.kpi span{color:var(--mut);font-size:13px}
+.chip{padding:4px 10px;border-radius:999px;border:1px solid var(--line);font-size:13px;cursor:pointer}.chip.done{background:var(--acc);color:#fff;border-color:var(--acc)}.chip.prog{border-color:var(--acc)}
+.ov{position:fixed;inset:0;background:var(--bg);z-index:50;display:flex;flex-direction:column}.ovb{display:flex;justify-content:space-between;align-items:center;padding:10px 14px;border-bottom:1px solid var(--line);background:var(--card)}.ovc{flex:1;overflow:auto;padding:8px}
+.blk{background:var(--card);border:1px solid var(--line);border-radius:10px;padding:8px 10px;margin-top:10px}.bh{display:flex;gap:8px;align-items:center;font-size:13px}.bh span{flex:1}.addbar{display:flex;gap:8px;flex-wrap:wrap;margin-top:10px}.btn{border:1px solid var(--line);border-radius:8px;padding:5px 10px;cursor:pointer}
+.card{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:16px}.card h3{margin:0 0 10px;font-size:15px}
+.hero{display:flex;gap:22px;align-items:center;flex-wrap:wrap;background:linear-gradient(135deg,var(--card),var(--bg));margin:14px 0}
+.hero h2{margin:0 0 4px;font-size:22px}.k2s{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:12px;margin-bottom:14px}
+.k2{display:flex;gap:12px;align-items:center;background:var(--card);border:1px solid var(--line);border-radius:14px;padding:14px}.k2 em{font-style:normal;font-size:24px;width:44px;height:44px;border-radius:12px;background:var(--bg);display:grid;place-items:center}
+.k2 b{display:block;font-size:22px;line-height:1.1}.k2 span{color:var(--mut);font-size:12px}
+.g2{display:grid;grid-template-columns:repeat(auto-fit,minmax(300px,1fr));gap:14px;margin-bottom:14px}
+.row{display:flex;justify-content:space-between;align-items:center;gap:8px;padding:9px 10px;border-radius:10px;cursor:pointer}.row:hover{background:var(--bg)}
+.pill{font-size:12px;padding:2px 8px;border-radius:999px;background:var(--bg);color:var(--mut);white-space:nowrap}
+.areas{display:grid;grid-template-columns:repeat(auto-fill,minmax(250px,1fr));gap:12px;margin-bottom:14px}.acard{display:flex;gap:12px;align-items:center;cursor:pointer}.acard:hover{border-color:var(--acc)}
+.act{display:flex;gap:6px;align-items:flex-end;height:120px}.act div{flex:1;display:flex;flex-direction:column;justify-content:flex-end;align-items:center;height:100%}.act i{width:100%;background:var(--acc);border-radius:5px 5px 0 0}.act span{font-size:10px;color:var(--mut);margin-top:4px}
+.cols{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:12px}.cols .chip{display:block;margin:6px 0;border-radius:10px}.cols h4{margin:0 0 6px;font-size:13px;color:var(--mut)}
 #st{position:fixed;right:14px;bottom:10px;font-size:12px;color:var(--mut)}
 @media(max-width:800px){body{flex-direction:column;height:auto}#side{width:100%;max-height:40vh;border-right:0;border-bottom:1px solid var(--line)}}
 </style></head><body>
-<div id="side"></div><div id="main"></div><div id="st"></div>
+<div id="side"></div><div id="main"></div><button id="sideReveal" aria-controls="side" aria-expanded="false" aria-label="Show sidebar" title="Show sidebar" onclick="toggleSide()">›</button><div id="st"></div>
 <script>
-let D={areas:[]}, sel=null, q='', open={}, t, dirty=false;
+document.documentElement.dataset.theme=(()=>{try{return localStorage.theme}catch(e){}})()||(matchMedia('(prefers-color-scheme:dark)').matches?'dark':'light');
+let D={areas:[]}, view='dash', sel=null, q='', opened={}, t, dirty=false;
+let sideHidden=(()=>{try{return localStorage.sideHidden==='1'}catch(e){return false}})();
 const uid=()=>Math.random().toString(36).slice(2,9);
 const $=s=>document.querySelector(s);
 const esc=s=>(s||'').replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
 
+function syncSide(){
+  document.body.classList.toggle('side-hidden',sideHidden);
+  const show=$('#sideReveal');
+  if(show){show.setAttribute('aria-expanded',String(!sideHidden));show.setAttribute('aria-label',sideHidden?'Show sidebar':'Hide sidebar');show.title=sideHidden?'Show sidebar':'Hide sidebar'}
+}
+function toggleSide(){
+  sideHidden=!sideHidden;
+  try{localStorage.sideHidden=sideHidden?'1':'0'}catch(e){}
+  syncSide();
+}
+
+function migrate(o){if(o.blocks)return;const c=o.updated||Date.now(),bl=[];
+  if(o.notes)bl.push({id:uid(),t:'text',text:o.notes,created:c-3,updated:c});
+  if(o.ink?.strokes?.length)bl.push({id:uid(),t:'ink',ink:o.ink,created:c-2,updated:c});
+  (o.files||[]).forEach(f=>bl.push({id:uid(),t:'file',file:f.file,name:f.name,created:c-1,updated:c}));
+  o.blocks=bl;delete o.notes;delete o.ink;delete o.files}
 function norm(){D.areas.forEach(a=>a.topics.forEach(tp=>{
-  tp.notes=tp.notes||'';
-  tp.subtopics=(tp.subtopics||[]).map(s=>typeof s==='string'?{id:uid(),name:s,done:false,notes:''}:s);
-}));}
-async function load(){D=await (await fetch('/api/data')).json();norm();if(!sel){const f=D.areas[0]?.topics[0];sel=f?.id}render();}
-function save(){dirty=true;$('#st').textContent='Saving…';clearTimeout(t);t=setTimeout(async()=>{
-  try{await fetch('/api/data',{method:'PUT',headers:{'Content-Type':'application/json'},body:JSON.stringify(D)});dirty=false;$('#st').textContent='Saved ✓'}
-  catch(e){$('#st').textContent='Save failed – retrying';save()}},600);}
+  tp.subtopics=(tp.subtopics||[]).map(s=>typeof s==='string'?{id:uid(),name:s,done:false}:s);
+  migrate(tp);tp.subtopics.forEach(migrate);}));}
+async function load(){try{
+  let r=await fetch('/api/data');if(r.status===404)r=await fetch('/seed.json');if(!r.ok)throw new Error('Server replied '+r.status+' (is public/seed.json present?)');
+  const txt=await r.text();try{D=JSON.parse(txt)}catch(e){throw new Error('data/db.json is not valid JSON: '+e.message+'\nStarts with: '+txt.slice(0,80))}
+  if(!D||!Array.isArray(D.areas))throw new Error('data file has no "areas" list. Delete data/db.json and reload.');
+  base=D.rev||0;try{const dr=JSON.parse(localStorage.draft||'null');if(dr&&Array.isArray(dr.areas)&&(dr.rev||0)>base){D=dr;dirty=true;clearTimeout(t);t=setTimeout(flush,3000)}}catch(e){}
+  D.areas.forEach(a=>a.topics=a.topics||[]);norm();
+  if(!sel){const f=D.areas[0]?.topics[0];sel=f?.id}render();
+}catch(e){$('#side').innerHTML='<h1>📚 Learning Notes</h1>';$('#main').innerHTML='<h2>Could not load</h2><pre style="white-space:pre-wrap">'+esc(String(e))+'</pre>'}}
+let base=0;const IDLE=30000;
+function save(){dirty=true;D.rev=Date.now();try{localStorage.draft=JSON.stringify(D)}catch(e){}
+  $('#st').textContent='Unsaved · commits to GitHub after 30s idle';clearTimeout(t);t=setTimeout(flush,IDLE)}
+async function flush(force){if(!dirty)return;clearTimeout(t);$('#st').textContent='Saving to GitHub…';
+  try{const r=await fetch('/api/data?base='+base+(force===true?'&force=1':''),{method:'PUT',headers:{'Content-Type':'application/json'},body:JSON.stringify(D)});
+    if(r.status===409){if(confirm("Another device saved newer notes.\nOK = overwrite them with this device's version\nCancel = load the other version"))return flush(true);
+      dirty=false;try{localStorage.removeItem('draft')}catch(e){}return load()}
+    if(!r.ok)throw new Error(r.status);
+    base=D.rev;dirty=false;try{localStorage.removeItem('draft')}catch(e){}$('#st').textContent='Saved to GitHub ✓ '+new Date().toLocaleTimeString()}
+  catch(e){$('#st').textContent='Save failed, retrying…';t=setTimeout(flush,10000)}}
+document.addEventListener('visibilitychange',()=>{if(document.hidden)flush()});addEventListener('pagehide',()=>flush());
 const find=id=>{for(const a of D.areas)for(const tp of a.topics)if(tp.id===id)return{a,tp}};
 const pct=tp=>{const n=tp.subtopics.length;return n?Math.round(100*tp.subtopics.filter(s=>s.done).length/n):(tp.done?100:0)};
 const bar=p=>`<div class="bar"><i style="width:${p}%"></i></div>`;
@@ -56,7 +111,7 @@ function render(){
   const all=D.areas.flatMap(a=>a.topics), subs=all.flatMap(t=>t.subtopics);
   const overall=subs.length?Math.round(100*subs.filter(s=>s.done).length/subs.length):0;
   const doneT=all.filter(t=>t.done).length;
-  let h=`<h1>📚 Learning Notes</h1>${bar(overall)}<div class="mut">${overall}% subtopics · ${doneT}/${all.length} topics done</div>
+  let h=`<div class="side-head"><h1>📚 Learning Notes</h1><div><button onclick="toggleTheme()" title="Light / dark" aria-label="Toggle theme">🌓</button><button onclick="toggleSide()" title="Hide sidebar" aria-label="Hide sidebar">‹</button></div></div><div style="display:flex;gap:6px;margin:8px 0"><button class="pri" style="flex:1" onclick="view='dash';render()">📊 Dashboard</button><button onclick="flush()">💾 Save</button></div>${bar(overall)}<div class="mut">${overall}% subtopics · ${doneT}/${all.length} topics done</div>
   <input type="search" placeholder="Search topics & notes…" value="${esc(q)}" oninput="q=this.value;renderSide()">`;
   $('#side').innerHTML=h+'<div id="tree"></div><input class="add" id="na" placeholder="+ New area (Enter)" onkeydown="if(event.key==\'Enter\')addArea(this)">';
   renderSide();renderMain();
@@ -64,80 +119,166 @@ function render(){
 function renderSide(){
   const ql=q.toLowerCase();let h='';
   D.areas.forEach(a=>{
-    const ts=a.topics.filter(tp=>!ql||(tp.name+tp.notes+tp.subtopics.map(s=>s.name+s.notes).join()).toLowerCase().includes(ql));
+    const ts=a.topics.filter(tp=>!ql||(tp.name+txt(tp)+tp.subtopics.map(s=>s.name+txt(s)).join()).toLowerCase().includes(ql));
     if(!ts.length&&ql)return;
     h+=`<div class="area"><span>${esc(a.name)}</span><span><button onclick="addTopic('${a.id}')">+</button> <button onclick="renameArea('${a.id}')">✎</button></span></div>`;
-    ts.forEach(tp=>h+=`<div class="topic ${tp.id===sel?'sel':''}" onclick="sel='${tp.id}';render()">${tp.done?'✅ ':''}${esc(tp.name)}<div class="mut">${tp.week?'Wk '+tp.week+' · ':''}${pct(tp)}%</div>${bar(pct(tp))}</div>`);
+    ts.forEach(tp=>h+=`<div class="topic ${view==='topic'&&tp.id===sel?'sel':''}" onclick="go('${tp.id}')">${tp.done?'✅ ':''}${esc(tp.name)}<div class="mut">${pct(tp)}%</div>${bar(pct(tp))}</div>`);
   });
   $('#tree').innerHTML=h;
 }
-function renderMain(){
+function renderMain(){if(view==='dash')return renderDash();
   const f=find(sel);if(!f){$('#main').innerHTML='<p class="mut">Select or add a topic.</p>';return}
   const tp=f.tp;
   let h=`<div style="display:flex;gap:10px;align-items:center;flex-wrap:wrap"><h1 style="font-size:24px;margin:0;flex:1">${esc(tp.name)}</h1>
    <label><input type="checkbox" ${tp.done?'checked':''} onchange="tp_('done',this.checked)"> Topic done</label>
    <button onclick="renameTopic()">Rename</button><button onclick="delTopic()">Delete</button></div>
-   <div class="mut">${esc(f.a.name)} ${tp.week?'· Week '+tp.week:''} ${tp.type?'· '+tp.type:''}</div>${bar(pct(tp))}`;
+   <div class="mut">${esc(f.a.name)} ${tp.type?'· '+tp.type:''}</div>${bar(pct(tp))}`;
   if(tp.learning_outcome)h+=`<p><b>Outcome:</b> ${esc(tp.learning_outcome)}</p>`;
   if(tp.project_task)h+=`<p><b>Project:</b> ${esc(tp.project_task)}</p>`;
-  h+=`<h3>Topic notes</h3><textarea oninput="tp_('notes',this.value,1)" placeholder="General notes, links, code…">${esc(tp.notes)}</textarea>${inkBox(tp.id)}<h3>Subtopics</h3>`;
+  h+=`<h3>Topic notes</h3>${blocksHTML(tp.id)}<h3>Subtopics</h3>`;
   tp.subtopics.forEach(s=>h+=`<div class="sub ${s.done?'done':''}"><div class="hd">
    <input type="checkbox" ${s.done?'checked':''} onchange="sub('${s.id}','done',this.checked)">
-   <b onclick="open['${s.id}']=!open['${s.id}'];renderMain()">${esc(s.name)} ${s.notes||s.ink?.strokes?.length?'📝':''}</b>
+   <b onclick="opened['${s.id}']=!opened['${s.id}'];renderMain()">${esc(s.name)} ${s.blocks?.length?'📝':''}</b>
    <button onclick="renameSub('${s.id}')">✎</button><button onclick="delSub('${s.id}')">🗑</button></div>
-   ${open[s.id]?`<textarea oninput="sub('${s.id}','notes',this.value,1)" placeholder="Type your notes…">${esc(s.notes)}</textarea>${inkBox(s.id)}`:''}</div>`);
+   ${opened[s.id]?blocksHTML(s.id):''}</div>`);
   h+=`<input class="add" placeholder="+ New subtopic (Enter)" onkeydown="if(event.key=='Enter')addSub(this)">`;
   $('#main').innerHTML=h;
   document.querySelectorAll('.ink').forEach(initInk);
 }
-function tp_(k,v,quiet){find(sel).tp[k]=v;save();if(!quiet)render()}
-function sub(id,k,v,quiet){find(sel).tp.subtopics.find(s=>s.id===id)[k]=v;save();if(!quiet){renderSide();renderMain()}}
+function tp_(k,v,quiet){const X=find(sel).tp;X[k]=v;X.updated=Date.now();save();if(!quiet)render()}
+function sub(id,k,v,quiet){const X=find(sel).tp.subtopics.find(s=>s.id===id);X[k]=v;X.updated=Date.now();save();if(!quiet){renderSide();renderMain()}}
 function addArea(i){if(!i.value.trim())return;D.areas.push({id:uid(),name:i.value.trim(),topics:[]});save();render()}
-function addTopic(aid){const n=prompt('Topic name?');if(!n)return;const tp={id:uid(),name:n,type:'Learn',done:false,notes:'',subtopics:[]};D.areas.find(a=>a.id===aid).topics.push(tp);sel=tp.id;save();render()}
+function addTopic(aid){const n=prompt('Topic name?');if(!n)return;const tp={id:uid(),name:n,type:'Learn',done:false,notes:'',subtopics:[]};D.areas.find(a=>a.id===aid).topics.push(tp);sel=tp.id;view='topic';save();render()}
 function addSub(i){if(!i.value.trim())return;find(sel).tp.subtopics.push({id:uid(),name:i.value.trim(),done:false,notes:''});save();render()}
 function renameArea(id){const a=D.areas.find(a=>a.id===id),n=prompt('Rename area (empty = delete)',a.name);if(n===null)return;if(!n.trim()){if(confirm('Delete area and all topics?'))D.areas=D.areas.filter(x=>x!==a)}else a.name=n;save();render()}
 function renameTopic(){const tp=find(sel).tp,n=prompt('Rename',tp.name);if(n){tp.name=n;save();render()}}
 function delTopic(){if(!confirm('Delete this topic and its notes?'))return;const f=find(sel);f.a.topics=f.a.topics.filter(x=>x!==f.tp);sel=null;save();render()}
 function renameSub(id){const s=find(sel).tp.subtopics.find(s=>s.id===id),n=prompt('Rename',s.name);if(n){s.name=n;save();render()}}
 function delSub(id){if(!confirm('Delete subtopic and its notes?'))return;const tp=find(sel).tp;tp.subtopics=tp.subtopics.filter(s=>s.id!==id);save();render()}
-// ---------- Handwriting ----------
-const T={tool:'pen',color:'#111827',penOnly:true};
-const COLORS=['#111827','#1d4ed8','#dc2626','#15803d'];
-function inkBox(oid){
-  return `<div class="ink" data-oid="${oid}"><div class="mut">✍️ Handwriting</div><div class="tb">
-   ${COLORS.map(c=>`<button data-c="${c}"><span class="dot" style="background:${c}"></span></button>`).join('')}
-   <button data-t="eraser">Eraser</button><button data-a="undo">Undo</button><button data-a="clear">Clear</button><button data-a="more">+ Space</button>
+// ---------- Handwriting + attachments ----------
+const T={tool:'pen',color:'auto',w:2.6,penOnly:true,hi:0};
+const dk=()=>document.documentElement.dataset.theme==='dark';
+const MAP={auto:['#111827','#f3f4f6'],'#111827':['#111827','#f3f4f6'],'#1d4ed8':['#1d4ed8','#60a5fa'],'#dc2626':['#dc2626','#f87171'],'#15803d':['#15803d','#4ade80']};
+const ic=c=>MAP[c]?MAP[c][dk()?1:0]:c;
+const COLORS=['auto','#1d4ed8','#dc2626','#15803d'], HL=['#facc15','#f472b6','#4ade80'];
+function getObj(oid){const tp=find(sel).tp;return tp.id===oid?tp:tp.subtopics.find(s=>s.id===oid)}
+const B=o=>o.blocks||(o.blocks=[]),txt=o=>B(o).filter(b=>b.t==='text').map(b=>b.text).join(' ');
+const rd=p=>[+p[0].toFixed(1),+p[1].toFixed(1),+p[2].toFixed(2)];
+const fmt=d=>new Date(d).toLocaleString([],{dateStyle:'medium',timeStyle:'short'});
+function blocksHTML(oid){const o=getObj(oid);
+  return `<div>${B(o).map(b=>blockHTML(oid,b)).join('')||'<p class="mut">Nothing here yet. Add typed notes, handwriting or a file below.</p>'}</div>
+  <div class="addbar"><button onclick="addBlock('${oid}','text')">＋ Type</button><button onclick="addBlock('${oid}','ink')">＋ Handwriting</button>
+  <label class="btn">＋ Attach<input type="file" hidden multiple accept="image/*,application/pdf" onchange="uploadFiles('${oid}',this.files)"></label></div>`;
+}
+function blockHTML(oid,b){
+  const head=`<div class="bh">${{text:'📝',ink:'✍️',file:'📎'}[b.t]}<span class="mut">${fmt(b.created)}${b.updated-b.created>60000?' · edited '+fmt(b.updated):''}</span><button onclick="delBlock('${oid}','${b.id}')">🗑</button></div>`;
+  let body='';
+  if(b.t==='text')body=`<textarea oninput="txtEdit('${oid}','${b.id}',this)" placeholder="Type your notes…">${esc(b.text)}</textarea>`;
+  else if(b.t==='ink')body=inkBox(oid,b);
+  else{const u='/files/'+encodeURIComponent(b.file);
+    body=/\.(png|jpe?g|gif|webp)$/i.test(b.file)?`<img src="${u}" loading="lazy" style="max-width:240px;border-radius:8px;cursor:zoom-in;margin-top:6px" onclick="openFile('${b.file}')">`:`<a href="#" onclick="openFile('${b.file}');return false">📄 ${esc(b.name)}</a>`}
+  return `<div class="blk">${head}${body}</div>`;
+}
+function inkBox(oid,b){const bg=b.ink?.bg||'ruled';
+  return `<div class="ink" data-oid="${oid}" data-b="${b.id}"><div class="tb">
+   ${COLORS.map(c=>`<button data-c="${c}"><span class="dot" style="background:${ic(c)}"></span></button>`).join('')}
+   <button data-t="hl">🖍 <span class="dot" style="background:${HL[T.hi]}"></span></button><button data-t="eraser">Eraser</button>
+   <select data-a="w"><option value="1.6">Thin</option><option value="2.6">Medium</option><option value="4.5">Thick</option></select>
+   <select data-a="bg">${['ruled','grid','dot','blank'].map(x=>`<option ${x===bg?'selected':''}>${x}</option>`).join('')}</select>
+   <button data-a="undo">Undo</button><button data-a="clear">Clear</button><button data-a="more">+ Space</button>
    <label><input type="checkbox" data-a="penonly" ${T.penOnly?'checked':''}> Pen only</label></div><canvas></canvas></div>`;
 }
-function getObj(oid){const tp=find(sel).tp;return tp.id===oid?tp:tp.subtopics.find(s=>s.id===oid)}
+function addBlock(oid,t){const o=getObj(oid),n=Date.now(),b={id:uid(),t,created:n,updated:n};
+  if(t==='text')b.text='';if(t==='ink')b.ink={h:600,strokes:[]};
+  B(o).push(b);o.updated=n;save();renderSide();renderMain();
+  if(t==='text'){const a=document.querySelector(`[data-b="${b.id}"] textarea`);a&&a.focus()}}
+function txtEdit(oid,bid,el){const o=getObj(oid),b=B(o).find(x=>x.id===bid);b.text=el.value;b.updated=o.updated=Date.now();save()}
+async function uploadFiles(oid,list){const o=getObj(oid);$('#st').textContent='Uploading…';
+  for(const f of list){const r=await fetch('/api/upload?name='+encodeURIComponent(f.name),{method:'POST',headers:{'Content-Type':'application/octet-stream'},body:f});
+    if(!r.ok){alert('Upload failed: '+f.name);continue}const j=await r.json(),n=Date.now();
+    B(o).push({id:uid(),t:'file',file:j.file,name:f.name,created:n,updated:n});o.updated=n}
+  save();renderSide();renderMain();}
+function delBlock(oid,bid){if(!confirm('Delete this block?'))return;const o=getObj(oid),b=B(o).find(x=>x.id===bid);
+  if(b&&b.t==='file')fetch('/api/upload/'+encodeURIComponent(b.file),{method:'DELETE'});
+  o.blocks=B(o).filter(x=>x.id!==bid);save();renderSide();renderMain();}
 function initInk(box){
-  const o=getObj(box.dataset.oid);o.ink=o.ink||{h:600,strokes:[]};
+  const o=B(getObj(box.dataset.oid)).find(b=>b.id===box.dataset.b);o.ink=o.ink||{h:600,strokes:[]};
   const cv=box.querySelector('canvas'),ctx=cv.getContext('2d'),W=1000,S=2;let cur=null;
+  box.querySelector('[data-a=w]').value=String(T.w);
   const size=()=>{cv.width=W*S;cv.height=o.ink.h*S;cv.style.aspectRatio=W+'/'+o.ink.h};
-  const seg=(s,i)=>{const a=s.pts[i-1],b=s.pts[i];ctx.strokeStyle=s.c;ctx.lineWidth=2.2*(0.4+b[2]);ctx.beginPath();ctx.moveTo(a[0],a[1]);ctx.lineTo(b[0],b[1]);ctx.stroke()};
-  const draw=()=>{ctx.setTransform(S,0,0,S,0,0);ctx.clearRect(0,0,W,o.ink.h);ctx.lineCap=ctx.lineJoin='round';
-    ctx.strokeStyle='#e5e7eb';ctx.lineWidth=1;for(let y=40;y<o.ink.h;y+=40){ctx.beginPath();ctx.moveTo(0,y);ctx.lineTo(W,y);ctx.stroke()}
-    o.ink.strokes.forEach(s=>{if(s.pts.length==1){ctx.fillStyle=s.c;ctx.beginPath();ctx.arc(s.pts[0][0],s.pts[0][1],1.5,0,7);ctx.fill()}for(let i=1;i<s.pts.length;i++)seg(s,i)})};
-  const pos=e=>{const r=cv.getBoundingClientRect();return[(e.clientX-r.left)*W/r.width,(e.clientY-r.top)*o.ink.h/r.height,e.pointerType==='pen'||e.pressure>0&&e.pressure!==0.5?e.pressure:0.5]};
+  const seg=(s,i)=>{const a=s.pts[i-1],b=s.pts[i];ctx.strokeStyle=ic(s.c);ctx.lineWidth=(s.w||2.2)*(0.4+b[2]);ctx.beginPath();ctx.moveTo(a[0],a[1]);ctx.lineTo(b[0],b[1]);ctx.stroke()};
+  const paint=s=>{if(s.a&&s.a<1){ctx.globalAlpha=s.a;ctx.strokeStyle=ic(s.c);ctx.lineWidth=s.w;ctx.beginPath();s.pts.forEach((q,i)=>i?ctx.lineTo(q[0],q[1]):ctx.moveTo(q[0],q[1]));ctx.stroke();ctx.globalAlpha=1;return}
+    if(s.pts.length==1){ctx.fillStyle=ic(s.c);ctx.beginPath();ctx.arc(s.pts[0][0],s.pts[0][1],1.5,0,7);ctx.fill()}for(let i=1;i<s.pts.length;i++)seg(s,i)};
+  const bgd=()=>{const st=o.ink.bg||'ruled',H=o.ink.h;ctx.strokeStyle=ctx.fillStyle=dk()?'#262b2f':'#e5e7eb';ctx.lineWidth=1;
+    if(st==='ruled'||st==='grid')for(let y=40;y<H;y+=40){ctx.beginPath();ctx.moveTo(0,y);ctx.lineTo(W,y);ctx.stroke()}
+    if(st==='grid')for(let x=40;x<W;x+=40){ctx.beginPath();ctx.moveTo(x,0);ctx.lineTo(x,H);ctx.stroke()}
+    if(st==='dot')for(let y=40;y<H;y+=40)for(let x=40;x<W;x+=40){ctx.beginPath();ctx.arc(x,y,1.6,0,7);ctx.fill()}};
+  const draw=()=>{ctx.setTransform(S,0,0,S,0,0);ctx.clearRect(0,0,W,o.ink.h);ctx.lineCap=ctx.lineJoin='round';bgd();o.ink.strokes.forEach(paint)};
+  const pos=e=>{const r=cv.getBoundingClientRect();return rd([(e.clientX-r.left)*W/r.width,(e.clientY-r.top)*o.ink.h/r.height,e.pointerType==='pen'||e.pressure>0&&e.pressure!==0.5?e.pressure:0.5])};
   const erase=p=>{const n=o.ink.strokes.length;o.ink.strokes=o.ink.strokes.filter(s=>!s.pts.some(q=>Math.hypot(q[0]-p[0],q[1]-p[1])<14));if(o.ink.strokes.length!==n)draw()};
-  const marks=()=>box.querySelectorAll('[data-c]').forEach(b=>b.classList.toggle('on',T.tool==='pen'&&b.dataset.c===T.color));
-  box.querySelector('[data-t]').classList.toggle('on',T.tool==='eraser');marks();
-  cv.onpointerdown=e=>{if(T.penOnly&&e.pointerType==='touch')return;e.preventDefault();cv.setPointerCapture(e.pointerId);
+  const marks=()=>{box.querySelectorAll('[data-c]').forEach(b=>b.classList.toggle('on',T.tool==='pen'&&b.dataset.c===T.color));box.querySelectorAll('[data-t]').forEach(b=>b.classList.toggle('on',T.tool===b.dataset.t))};
+  cv.onpointerdown=e=>{if(T.penOnly&&e.pointerType==='touch'){cur={scroll:1,y:e.clientY};cv.setPointerCapture(e.pointerId);return}e.preventDefault();cv.setPointerCapture(e.pointerId);
     const p=pos(e);if(T.tool==='eraser'){cur='e';erase(p);return}
-    cur={c:T.color,pts:[p]};o.ink.strokes.push(cur);draw()};
-  cv.onpointermove=e=>{if(!cur)return;const evs=e.getCoalescedEvents?e.getCoalescedEvents():[e];
-    for(const ev of evs){const p=pos(ev);if(cur==='e')erase(p);else{cur.pts.push(p);seg(cur,cur.pts.length-1)}}};
-  cv.onpointerup=cv.onpointercancel=()=>{if(cur){cur=null;save();renderSide()}};
-  box.onclick=e=>{const b=e.target.closest('button,input');if(!b)return;
-    if(b.dataset.c){T.color=b.dataset.c;T.tool='pen';box.querySelector('[data-t]').classList.remove('on');marks()}
-    else if(b.dataset.t){T.tool=T.tool==='eraser'?'pen':'eraser';b.classList.toggle('on',T.tool==='eraser');marks()}
+    cur=T.tool==='hl'?{c:HL[T.hi],w:16,a:.35,pts:[p]}:{c:T.color,w:T.w,pts:[p]};o.ink.strokes.push(cur);draw()};
+  cv.onpointermove=e=>{if(!cur)return;if(cur.scroll){const dy=e.clientY-cur.y;cur.y=e.clientY;$('#main').scrollTop-=dy;window.scrollBy(0,-dy);return}const evs=e.getCoalescedEvents?e.getCoalescedEvents():[e];
+    for(const ev of evs){const p=pos(ev);if(cur==='e')erase(p);else{cur.pts.push(p);if(!cur.a)seg(cur,cur.pts.length-1)}}
+    if(cur.a)draw()};
+  cv.onpointerup=cv.onpointercancel=()=>{if(cur&&cur.scroll){cur=null;return}if(cur){cur=null;o.updated=Date.now();save();renderSide()}};
+  box.onchange=e=>{const a=e.target.dataset.a;if(a==='w')T.w=+e.target.value;if(a==='bg'){o.ink.bg=e.target.value;draw();save()}};
+  box.onclick=e=>{const b=e.target.closest('button,input[type=checkbox]');if(!b)return;
+    if(b.dataset.c){T.color=b.dataset.c;T.tool='pen'}
+    else if(b.dataset.t==='hl'){if(T.tool==='hl')T.hi=(T.hi+1)%3;T.tool='hl';b.querySelector('.dot').style.background=HL[T.hi]}
+    else if(b.dataset.t==='eraser')T.tool=T.tool==='eraser'?'pen':'eraser';
     else if(b.dataset.a==='undo'){o.ink.strokes.pop();draw();save()}
     else if(b.dataset.a==='clear'){if(confirm('Clear all handwriting here?')){o.ink.strokes=[];draw();save()}}
     else if(b.dataset.a==='more'){o.ink.h+=400;size();draw();save()}
-    else if(b.dataset.a==='penonly')T.penOnly=b.checked};
-  size();draw();
+    else if(b.dataset.a==='penonly')T.penOnly=b.checked;
+    marks()};
+  marks();size();draw();
+}
+function go(id){sel=id;view='topic';render()}
+function toggleTheme(){const d=document.documentElement,n=dk()?'light':'dark';d.dataset.theme=n;try{localStorage.theme=n}catch(e){}render()}
+function exportJson(){const a=document.createElement('a');a.href=URL.createObjectURL(new Blob([JSON.stringify(D)],{type:'application/json'}));a.download='notes-backup.json';a.click()}
+const PDFV='3.11.174',CDN='https://cdnjs.cloudflare.com/ajax/libs/pdf.js/'+PDFV+'/';
+function loadPdfJs(){return window.pdfjsLib?Promise.resolve():new Promise((ok,no)=>{const s=document.createElement('script');s.src=CDN+'pdf.min.js';s.onload=()=>{pdfjsLib.GlobalWorkerOptions.workerSrc=CDN+'pdf.worker.min.js';ok()};s.onerror=()=>no('Could not load PDF reader');document.head.appendChild(s)})}
+function openFile(file){
+  const u='/files/'+encodeURIComponent(file),name=file.replace(/^[^-]+-/,''),img=/\.(png|jpe?g|gif|webp)$/i.test(file);
+  const ov=document.createElement('div');ov.className='ov';
+  ov.innerHTML=`<div class="ovb"><b>${esc(name)}</b><button onclick="this.closest('.ov').remove()">✕ Close</button></div><div class="ovc"></div>`;
+  document.body.appendChild(ov);const c=ov.querySelector('.ovc');
+  if(img){c.innerHTML=`<img src="${u}" style="max-width:100%;display:block;margin:auto">`;return}
+  c.textContent='Loading PDF…';
+  loadPdfJs().then(async()=>{const pdf=await pdfjsLib.getDocument(u).promise;c.textContent='';
+    for(let i=1;i<=pdf.numPages;i++){const pg=await pdf.getPage(i),w=Math.min(c.clientWidth-16,1100),sc=w/pg.getViewport({scale:1}).width,d=window.devicePixelRatio||1,v=pg.getViewport({scale:sc*d}),cv=document.createElement('canvas');
+      cv.width=v.width;cv.height=v.height;cv.style.cssText=`width:${w}px;display:block;margin:8px auto;background:#fff`;c.appendChild(cv);await pg.render({canvasContext:cv.getContext('2d'),viewport:v}).promise}
+  }).catch(e=>c.textContent='Could not open PDF: '+e);
+}
+function ring(p,z=120,w=12){const r=(z-w)/2,c=2*Math.PI*r,m=z/2;
+  return `<svg width="${z}" height="${z}" viewBox="0 0 ${z} ${z}"><circle cx="${m}" cy="${m}" r="${r}" fill="none" stroke="var(--line)" stroke-width="${w}"/><circle cx="${m}" cy="${m}" r="${r}" fill="none" stroke="var(--acc)" stroke-width="${w}" stroke-linecap="round" stroke-dasharray="${c*p/100} ${c}" transform="rotate(-90 ${m} ${m})"/><text x="50%" y="50%" text-anchor="middle" dominant-baseline="central" fill="var(--ink)" font-size="${z/4.2}" font-weight="700">${p}%</text></svg>`}
+function renderDash(){
+  const all=D.areas.flatMap(a=>a.topics.map(t=>({...t,area:a.name}))),subs=all.flatMap(t=>t.subtopics),objs=[...all,...subs];
+  const sd=subs.filter(s=>s.done).length,td=all.filter(t=>t.done).length,ov=subs.length?Math.round(100*sd/subs.length):0;
+  const bl=objs.flatMap(o=>o.blocks||[]),typed=bl.filter(b=>b.t==='text'&&b.text).length,ink=bl.filter(b=>b.t==='ink'&&b.ink?.strokes?.length).length,files=bl.filter(b=>b.t==='file').length;
+  const st=t=>t.done||pct(t)===100?'done':pct(t)>0?'prog':'todo',ids=new Set(all.filter(t=>t.done).map(t=>t.id));
+  const next=all.filter(t=>!t.done&&(t.depends_on||[]).every(d=>ids.has(d))).slice(0,5);
+  const rec=[...all.map(t=>({n:t.name,id:t.id,u:t.updated})),...all.flatMap(t=>t.subtopics.map(s=>({n:s.name,sub:t.name,id:t.id,u:s.updated})))].filter(x=>x.u).sort((a,b)=>b.u-a.u).slice(0,6);
+  const days=[...Array(14)].map((_,i)=>{const d=new Date();d.setDate(d.getDate()-13+i);return d}),
+    cnt=days.map(d=>bl.filter(b=>new Date(b.updated||b.created).toDateString()===d.toDateString()).length),mx=Math.max(1,...cnt);
+  let streak=0;for(let i=13;i>=0&&cnt[i]>0;i--)streak++;
+  const k=(i,n,l)=>`<div class="k2"><em>${i}</em><div><b>${n}</b><span>${l}</span></div></div>`;
+  const col=(t,k)=>`<div><h4>${t} (${all.filter(x=>st(x)===k).length})</h4>${all.filter(x=>st(x)===k).map(x=>`<span class="chip ${k}" onclick="go('${x.id}')">${esc(x.name)}</span>`).join('')||'<span class="mut">–</span>'}</div>`;
+  $('#main').innerHTML=`<div style="display:flex;justify-content:space-between;align-items:center"><h1 style="font-size:24px;margin:0">📊 Dashboard</h1><button onclick="exportJson()">⬇ Backup (JSON)</button></div>
+  <div class="card hero">${ring(ov,130,14)}<div><h2>${ov===100?'All done! 🎉':ov>0?'Keep going!':'Let’s get started'}</h2><div class="mut">${sd} of ${subs.length} subtopics and ${td} of ${all.length} topics completed</div><div class="mut" style="margin-top:6px">${streak?'🔥 '+streak+'-day streak':'Write something today to start a streak'}</div></div></div>
+  <div class="k2s">${k('✅',td+'/'+all.length,'Topics done')}${k('📝',typed,'Typed notes')}${k('✍️',ink,'Handwritten pages')}${k('📎',files,'Attachments')}</div>
+  <div class="g2"><div class="card"><h3>▶ Up next</h3>${next.map(t=>`<div class="row" onclick="go('${t.id}')"><span>${esc(t.name)}<br><span class="mut">${esc(t.area)}</span></span><span class="pill">${pct(t)}%</span></div>`).join('')||'<p class="mut">Nothing pending 🎉</p>'}</div>
+  <div class="card"><h3>🕘 Recently edited</h3>${rec.map(x=>`<div class="row" onclick="go('${x.id}')"><span>${esc(x.n)}${x.sub?`<br><span class="mut">${esc(x.sub)}</span>`:''}</span><span class="pill">${new Date(x.u).toLocaleDateString([],{day:'numeric',month:'short'})}</span></div>`).join('')||'<p class="mut">Nothing yet. Start writing!</p>'}</div></div>
+  <div class="areas">${D.areas.map(a=>{const ss=a.topics.flatMap(t=>t.subtopics),p=ss.length?Math.round(100*ss.filter(s=>s.done).length/ss.length):0,first=a.topics.find(t=>!t.done)||a.topics[0];
+    return `<div class="card acard" onclick="${first?`go('${first.id}')`:''}">${ring(p,64,8)}<div><b>${esc(a.name)}</b><div class="mut">${a.topics.filter(t=>t.done).length}/${a.topics.length} topics</div></div></div>`}).join('')}</div>
+  <div class="card" style="margin-bottom:14px"><h3>📈 Activity (last 14 days)</h3><div class="act">${cnt.map((n,i)=>`<div title="${days[i].toLocaleDateString()}: ${n} edits"><i style="height:${n?Math.max(6,n/mx*100):3}%;opacity:${n?1:.3}"></i><span>${days[i].getDate()}</span></div>`).join('')}</div></div>
+  <div class="card"><h3>📋 Status board</h3><div class="cols">${col('To do','todo')}${col('In progress','prog')}${col('Done','done')}</div></div>`;
 }
 // pick up edits made on the other device
 window.addEventListener('focus',()=>{if(!dirty&&document.activeElement.tagName!=='TEXTAREA')load()});
+syncSide();
 load();
 </script></body></html>
