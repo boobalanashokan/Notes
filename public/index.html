@@ -139,8 +139,17 @@ function migrate(o){if(o.blocks)return;const c=o.updated||Date.now(),bl=[];
   (o.files||[]).forEach(f=>bl.push({id:uid(),t:'file',file:f.file,name:f.name,created:c-1,updated:c}));
   o.blocks=bl;delete o.notes;delete o.ink;delete o.files}
 function norm(){
-  D.areas=D.areas.filter(a=>a&&typeof a==='object'&&!Array.isArray(a));
-  D.areas.forEach(a=>{
+  if(!Array.isArray(D.roadmaps)){
+    const first={id:D.id||uid(),name:D.name||'Data Scientist',areas:Array.isArray(D.areas)?D.areas:[]};
+    D.roadmaps=[first];D.activeRoadmapId=first.id;delete D.areas;
+  }
+  D.roadmaps=D.roadmaps.filter(r=>r&&typeof r==='object'&&!Array.isArray(r));
+  if(!D.roadmaps.length)D.roadmaps.push({id:uid(),name:'Data Scientist',areas:[]});
+  if(!D.roadmaps.some(r=>r.id===D.activeRoadmapId))D.activeRoadmapId=D.roadmaps[0].id;
+  D.roadmaps.forEach(r=>{
+    r.areas=Array.isArray(r.areas)?r.areas:[];
+    r.areas=r.areas.filter(a=>a&&typeof a==='object'&&!Array.isArray(a));
+    r.areas.forEach(a=>{
     a.topics=Array.isArray(a.topics)?a.topics.filter(tp=>tp&&typeof tp==='object'&&!Array.isArray(tp)):[];
     a.topics.forEach(tp=>{
       tp.subtopics=(Array.isArray(tp.subtopics)?tp.subtopics:[])
@@ -148,17 +157,20 @@ function norm(){
         .map(s=>typeof s==='string'?{id:uid(),name:s,done:false}:s);
       migrate(tp);tp.subtopics.forEach(migrate);
     });
+    });
   });
 }
+const roadmap=()=>D.roadmaps.find(r=>r.id===D.activeRoadmapId);
+const roadmapAreas=()=>roadmap()?.areas||[];
 async function load(){if(!GH_TOKEN){showConnect();return}try{
   const stored=await readRepoFile('data/db.json');let txt;
   if(stored){txt=stored.text;dbSha=stored.sha}
   else{const r=await fetch('./seed.json');if(!r.ok)throw new Error('Could not load seed.json ('+r.status+')');txt=await r.text();dbSha=null}
   try{D=JSON.parse(txt)}catch(e){throw new Error('data/db.json is not valid JSON: '+e.message+'\nStarts with: '+txt.slice(0,80))}
-  if(!D||!Array.isArray(D.areas))throw new Error('data file has no "areas" list. Delete data/db.json and reload.');
-  base=D.rev||0;try{const dr=JSON.parse(localStorage.draft||'null');if(dr&&Array.isArray(dr.areas)&&(dr.rev||0)>base){D=dr;dirty=true;clearTimeout(t);t=setTimeout(flush,3000)}}catch(e){}
+  if(!D||(!Array.isArray(D.areas)&&!Array.isArray(D.roadmaps)))throw new Error('data file has no roadmap data.');
+  base=D.rev||0;try{const dr=JSON.parse(localStorage.draft||'null');if(dr&&(Array.isArray(dr.areas)||Array.isArray(dr.roadmaps))&&(dr.rev||0)>base){D=dr;dirty=true;clearTimeout(t);t=setTimeout(flush,3000)}}catch(e){}
   norm();
-  if(!sel){const f=D.areas[0]?.topics[0];sel=f?.id}render();
+  if(!sel){const f=roadmapAreas()[0]?.topics[0];sel=f?.id}render();
 }catch(e){$('#side').innerHTML='<h1>📚 Learning Notes</h1>';$('#main').innerHTML=`<div class="card"><h2>Could not load</h2><pre style="white-space:pre-wrap">${esc(String(e))}</pre><button onclick="load()">Retry</button> <button onclick="disconnectGitHub()">Change token</button></div>`}}
 let base=0;const IDLE=30000;
 function save(){dirty=true;D.rev=Date.now();try{localStorage.draft=JSON.stringify(D)}catch(e){}
@@ -171,22 +183,22 @@ async function flush(force){if(!dirty)return;clearTimeout(t);$('#st').textConten
     dbSha=result.content?.sha||dbSha;base=D.rev;dirty=false;try{localStorage.removeItem('draft')}catch(e){}$('#st').textContent='Saved to GitHub ✓ '+new Date().toLocaleTimeString()}
   catch(e){console.error(e);$('#st').textContent='Save failed: '+e.message;t=setTimeout(flush,10000)}}
 document.addEventListener('visibilitychange',()=>{if(document.hidden)flush()});addEventListener('pagehide',()=>flush());
-const find=id=>{for(const a of D.areas)for(const tp of a.topics)if(tp.id===id)return{a,tp}};
+const find=id=>{for(const a of roadmapAreas())for(const tp of a.topics)if(tp.id===id)return{a,tp}};
 const pct=tp=>{const n=tp.subtopics.length;return n?Math.round(100*tp.subtopics.filter(s=>s.done).length/n):(tp.done?100:0)};
 const bar=p=>`<div class="bar"><i style="width:${p}%"></i></div>`;
 
 function render(){
-  const all=D.areas.flatMap(a=>a.topics), subs=all.flatMap(t=>t.subtopics);
+  const areas=roadmapAreas(),all=areas.flatMap(a=>a.topics), subs=all.flatMap(t=>t.subtopics);
   const overall=subs.length?Math.round(100*subs.filter(s=>s.done).length/subs.length):0;
   const doneT=all.filter(t=>t.done).length;
-  let h=`<div class="side-head"><h1>📚 Learning Notes</h1><div><button onclick="toggleTheme()" title="Light / dark" aria-label="Toggle theme">🌓</button><button onclick="disconnectGitHub()" title="Disconnect GitHub" aria-label="Disconnect GitHub">↪</button><button onclick="toggleSide()" title="Hide sidebar" aria-label="Hide sidebar">‹</button></div></div><div style="display:flex;gap:6px;margin:8px 0"><button class="pri" style="flex:1" onclick="view='dash';render()">📊 Dashboard</button><button onclick="flush()">💾 Save</button></div>${bar(overall)}<div class="mut">${overall}% subtopics · ${doneT}/${all.length} topics done</div>
+  let h=`<div class="side-head"><h1>📚 Learning Notes</h1><div><button onclick="toggleTheme()" title="Light / dark" aria-label="Toggle theme">🌓</button><button onclick="disconnectGitHub()" title="Disconnect GitHub" aria-label="Disconnect GitHub">↪</button><button onclick="toggleSide()" title="Hide sidebar" aria-label="Hide sidebar">‹</button></div></div><div style="display:flex;gap:6px;margin:8px 0"><button class="pri" style="flex:1" onclick="view='dash';render()">📊 Dashboard</button><button onclick="flush()">💾 Save</button></div><div style="display:flex;gap:6px"><select aria-label="Active roadmap" onchange="switchRoadmap(this.value)" style="flex:1;min-width:0;padding:8px;border:1px solid var(--line);border-radius:8px;background:var(--bg);color:var(--ink)">${D.roadmaps.map(r=>`<option value="${esc(r.id)}" ${r.id===D.activeRoadmapId?'selected':''}>${esc(r.name)}</option>`).join('')}</select><button onclick="addRoadmap()" title="Create roadmap">＋ Roadmap</button></div>${bar(overall)}<div class="mut">${overall}% subtopics · ${doneT}/${all.length} topics done</div>
   <input type="search" placeholder="Search topics & notes…" value="${esc(q)}" oninput="q=this.value;renderSide()">`;
   $('#side').innerHTML=h+'<div id="tree"></div><input class="add" id="na" placeholder="+ New area (Enter)" onkeydown="if(event.key==\'Enter\')addArea(this)">';
   renderSide();renderMain();
 }
 function renderSide(){
   const ql=q.toLowerCase();let h='';
-  D.areas.forEach(a=>{
+  roadmapAreas().forEach(a=>{
     const ts=a.topics.filter(tp=>!ql||(tp.name+txt(tp)+tp.subtopics.map(s=>s.name+txt(s)).join()).toLowerCase().includes(ql));
     if(!ts.length&&ql)return;
     h+=`<div class="area"><span>${esc(a.name)}</span><span><button onclick="addTopic('${a.id}')">+</button> <button onclick="renameArea('${a.id}')">✎</button></span></div>`;
@@ -216,10 +228,12 @@ function renderMain(){if(view==='dash')return renderDash();
 }
 function tp_(k,v,quiet){const X=find(sel).tp;X[k]=v;X.updated=Date.now();save();if(!quiet)render()}
 function sub(id,k,v,quiet){const X=find(sel).tp.subtopics.find(s=>s.id===id);X[k]=v;X.updated=Date.now();save();if(!quiet){renderSide();renderMain()}}
-function addArea(i){if(!i.value.trim())return;D.areas.push({id:uid(),name:i.value.trim(),topics:[]});save();render()}
-function addTopic(aid){const n=prompt('Topic name?');if(!n)return;const tp={id:uid(),name:n,type:'Learn',done:false,notes:'',subtopics:[]};D.areas.find(a=>a.id===aid).topics.push(tp);sel=tp.id;view='topic';save();render()}
+function switchRoadmap(id){if(!D.roadmaps.some(r=>r.id===id))return;D.activeRoadmapId=id;sel=roadmapAreas()[0]?.topics[0]?.id||null;view='dash';save();render()}
+function addRoadmap(){const name=prompt('Roadmap name?','MLOps');if(!name?.trim())return;const next={id:uid(),name:name.trim(),areas:[]};D.roadmaps.push(next);D.activeRoadmapId=next.id;sel=null;view='dash';save();render()}
+function addArea(i){if(!i.value.trim())return;roadmapAreas().push({id:uid(),name:i.value.trim(),topics:[]});save();render()}
+function addTopic(aid){const n=prompt('Topic name?');if(!n)return;const tp={id:uid(),name:n,type:'Learn',done:false,notes:'',subtopics:[]};roadmapAreas().find(a=>a.id===aid).topics.push(tp);sel=tp.id;view='topic';save();render()}
 function addSub(i){if(!i.value.trim())return;find(sel).tp.subtopics.push({id:uid(),name:i.value.trim(),done:false,notes:''});save();render()}
-function renameArea(id){const a=D.areas.find(a=>a.id===id),n=prompt('Rename area (empty = delete)',a.name);if(n===null)return;if(!n.trim()){if(confirm('Delete area and all topics?'))D.areas=D.areas.filter(x=>x!==a)}else a.name=n;save();render()}
+function renameArea(id){const a=roadmapAreas().find(a=>a.id===id),n=prompt('Rename area (empty = delete)',a.name);if(n===null)return;if(!n.trim()){if(confirm('Delete area and all topics?'))roadmap().areas=roadmapAreas().filter(x=>x!==a)}else a.name=n;save();render()}
 function renameTopic(){const tp=find(sel).tp,n=prompt('Rename',tp.name);if(n){tp.name=n;save();render()}}
 function delTopic(){if(!confirm('Delete this topic and its notes?'))return;const f=find(sel);f.a.topics=f.a.topics.filter(x=>x!==f.tp);sel=null;save();render()}
 function renameSub(id){const s=find(sel).tp.subtopics.find(s=>s.id===id),n=prompt('Rename',s.name);if(n){s.name=n;save();render()}}
@@ -340,7 +354,7 @@ async function openFile(file){
 function ring(p,z=120,w=12){const r=(z-w)/2,c=2*Math.PI*r,m=z/2;
   return `<svg width="${z}" height="${z}" viewBox="0 0 ${z} ${z}"><circle cx="${m}" cy="${m}" r="${r}" fill="none" stroke="var(--line)" stroke-width="${w}"/><circle cx="${m}" cy="${m}" r="${r}" fill="none" stroke="var(--acc)" stroke-width="${w}" stroke-linecap="round" stroke-dasharray="${c*p/100} ${c}" transform="rotate(-90 ${m} ${m})"/><text x="50%" y="50%" text-anchor="middle" dominant-baseline="central" fill="var(--ink)" font-size="${z/4.2}" font-weight="700">${p}%</text></svg>`}
 function renderDash(){
-  const all=D.areas.flatMap(a=>a.topics.map(t=>({...t,area:a.name}))),subs=all.flatMap(t=>t.subtopics),objs=[...all,...subs];
+  const areas=roadmapAreas(),all=areas.flatMap(a=>a.topics.map(t=>({...t,area:a.name}))),subs=all.flatMap(t=>t.subtopics),objs=[...all,...subs];
   const sd=subs.filter(s=>s.done).length,td=all.filter(t=>t.done).length,ov=subs.length?Math.round(100*sd/subs.length):0;
   const bl=objs.flatMap(o=>o.blocks||[]),typed=bl.filter(b=>b.t==='text'&&b.text).length,ink=bl.filter(b=>b.t==='ink'&&b.ink?.strokes?.length).length,files=bl.filter(b=>b.t==='file').length;
   const st=t=>t.done||pct(t)===100?'done':pct(t)>0?'prog':'todo',ids=new Set(all.filter(t=>t.done).map(t=>t.id));
@@ -351,12 +365,12 @@ function renderDash(){
   let streak=0;for(let i=13;i>=0&&cnt[i]>0;i--)streak++;
   const k=(i,n,l)=>`<div class="k2"><em>${i}</em><div><b>${n}</b><span>${l}</span></div></div>`;
   const col=(t,k)=>`<div><h4>${t} (${all.filter(x=>st(x)===k).length})</h4>${all.filter(x=>st(x)===k).map(x=>`<span class="chip ${k}" onclick="go('${x.id}')">${esc(x.name)}</span>`).join('')||'<span class="mut">–</span>'}</div>`;
-  $('#main').innerHTML=`<div style="display:flex;justify-content:space-between;align-items:center"><h1 style="font-size:24px;margin:0">📊 Dashboard</h1><button onclick="exportJson()">⬇ Backup (JSON)</button></div>
+  $('#main').innerHTML=`<div style="display:flex;justify-content:space-between;align-items:center"><h1 style="font-size:24px;margin:0">${esc(roadmap().name)} Roadmap</h1><button onclick="exportJson()">⬇ Backup (JSON)</button></div>
   <div class="card hero">${ring(ov,130,14)}<div><h2>${ov===100?'All done! 🎉':ov>0?'Keep going!':'Let’s get started'}</h2><div class="mut">${sd} of ${subs.length} subtopics and ${td} of ${all.length} topics completed</div><div class="mut" style="margin-top:6px">${streak?'🔥 '+streak+'-day streak':'Write something today to start a streak'}</div></div></div>
   <div class="k2s">${k('✅',td+'/'+all.length,'Topics done')}${k('📝',typed,'Typed notes')}${k('✍️',ink,'Handwritten pages')}${k('📎',files,'Attachments')}</div>
   <div class="g2"><div class="card"><h3>▶ Up next</h3>${next.map(t=>`<div class="row" onclick="go('${t.id}')"><span>${esc(t.name)}<br><span class="mut">${esc(t.area)}</span></span><span class="pill">${pct(t)}%</span></div>`).join('')||'<p class="mut">Nothing pending 🎉</p>'}</div>
   <div class="card"><h3>🕘 Recently edited</h3>${rec.map(x=>`<div class="row" onclick="go('${x.id}')"><span>${esc(x.n)}${x.sub?`<br><span class="mut">${esc(x.sub)}</span>`:''}</span><span class="pill">${new Date(x.u).toLocaleDateString([],{day:'numeric',month:'short'})}</span></div>`).join('')||'<p class="mut">Nothing yet. Start writing!</p>'}</div></div>
-  <div class="areas">${D.areas.map(a=>{const ss=a.topics.flatMap(t=>t.subtopics),p=ss.length?Math.round(100*ss.filter(s=>s.done).length/ss.length):0,first=a.topics.find(t=>!t.done)||a.topics[0];
+  <div class="areas">${areas.map(a=>{const ss=a.topics.flatMap(t=>t.subtopics),p=ss.length?Math.round(100*ss.filter(s=>s.done).length/ss.length):0,first=a.topics.find(t=>!t.done)||a.topics[0];
     return `<div class="card acard" onclick="${first?`go('${first.id}')`:''}">${ring(p,64,8)}<div><b>${esc(a.name)}</b><div class="mut">${a.topics.filter(t=>t.done).length}/${a.topics.length} topics</div></div></div>`}).join('')}</div>
   <div class="card" style="margin-bottom:14px"><h3>📈 Activity (last 14 days)</h3><div class="act">${cnt.map((n,i)=>`<div title="${days[i].toLocaleDateString()}: ${n} edits"><i style="height:${n?Math.max(6,n/mx*100):3}%;opacity:${n?1:.3}"></i><span>${days[i].getDate()}</span></div>`).join('')}</div></div>
   <div class="card"><h3>📋 Status board</h3><div class="cols">${col('To do','todo')}${col('In progress','prog')}${col('Done','done')}</div></div>`;
